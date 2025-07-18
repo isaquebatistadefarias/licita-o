@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo - Licitações Mirassol d'Oeste</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --secondary-color: #6c757d;
+      --success-color: #198754;
+      --danger-color: #dc3545;
+      --warning-color: #ffc107;
+      --info-color: #0dcaf0;
+    }
+
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .sidebar {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--primary-color) 0%, #0b5ed7 100%);
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar .nav-link {
+      color: rgba(255, 255, 255, 0.8);
+      padding: 12px 20px;
+      margin: 2px 10px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+      color: white;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .header {
+      background: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+
+    .card {
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .table-responsive {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .badge.fase-preparacao { background-color: #17a2b8; }
+    .badge.fase-publicacao { background-color: #ffc107; color: #000; }
+    .badge.fase-andamento { background-color: #007bff; }
+    .badge.fase-julgamento { background-color: #fd7e14; }
+    .badge.fase-recurso { background-color: #dc3545; }
+    .badge.fase-homologacao { background-color: #28a745; }
+    .badge.fase-finalizada { background-color: #6c757d; }
+    .badge.fase-suspensa { background-color: #e83e8c; }
+    .badge.fase-cancelada { background-color: #343a40; }
+
+    .form-section {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        margin-left: -280px;
+      }
+      .sidebar.show {
+        margin-left: 0;
+      }
+      .main-content {
+        margin-left: 0;
+      }
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="p-3">
+      <div class="d-flex align-items-center mb-4">
+        <img src="logo-secretaria-admin.png" alt="Logo Secretaria de Administração" style="width: 50px; height: 50px;" class="me-3">
+        <div>
+          <h6 class="mb-0">Painel Admin</h6>
+          <small class="text-white-50">Licitações</small>
+        </div>
+      </div>
+      
+      <ul class="nav nav-pills flex-column">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" onclick="mostrarSecao('dashboard')">
+            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="mostrarSecao('licitacoes')">
+            <i class="bi bi-file-text me-2"></i>Licitações
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="mostrarSecao('nova-licitacao')">
+            <i class="bi bi-plus-circle me-2"></i>Nova Licitação
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="mostrarSecao('secretarias')">
+            <i class="bi bi-building me-2"></i>Secretarias
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="mostrarSecao('pregoeiros')">
+            <i class="bi bi-people me-2"></i>Pregoeiros
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="mostrarSecao('modalidades')">
+            <i class="bi bi-tags me-2"></i>Modalidades
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="mostrarSecao('equipe-apoio')">
+            <i class="bi bi-people-fill me-2"></i>Equipe de Apoio
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="mostrarSecao('configuracoes')">
+            <i class="bi bi-gear me-2"></i>Configurações
+          </a>
+        </li>
+        <li class="nav-item mt-3">
+          <a class="nav-link text-warning" href="site_publico_melhorado.html" target="_blank">
+            <i class="bi bi-eye me-2"></i>Ver Site Público
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <div class="header d-flex justify-content-between align-items-center">
+      <div>
+        <h4 class="mb-0" id="page-title">Dashboard</h4>
+        <small class="text-muted">Sistema de Licitações - Mirassol d'Oeste</small>
+      </div>
+      <div>
+        <span class="user-info text-white me-3">
+          <i class="bi bi-person-circle me-2"></i>
+          Usuário
+        </span>
+        <button class="btn btn-outline-primary me-2" onclick="sincronizarDados()">
+          <i class="bi bi-arrow-clockwise"></i> Sincronizar
+        </button>
+        <button class="btn btn-outline-secondary" onclick="logout()">
+          <i class="bi bi-box-arrow-right"></i> Sair
+        </button>
+      </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="content-section">
+      <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+          <div class="card stat-card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <h3 class="mb-0" id="total-licitacoes">0</h3>
+                  <p class="text-muted mb-0">Total de Licitações</p>
+                </div>
+                <div class="text-primary">
+                  <i class="bi bi-file-text" style="font-size: 2rem;"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="card stat-card" style="border-left-color: #28a745;">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <h3 class="mb-0" id="em-andamento">0</h3>
+                  <p class="text-muted mb-0">Em Andamento</p>
+                </div>
+                <div class="text-success">
+                  <i class="bi bi-clock" style="font-size: 2rem;"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="card stat-card" style="border-left-color: #ffc107;">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <h3 class="mb-0" id="publicadas">0</h3>
+                  <p class="text-muted mb-0">Publicadas</p>
+                </div>
+                <div class="text-warning">
+                  <i class="bi bi-megaphone" style="font-size: 2rem;"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="card stat-card" style="border-left-color: #dc3545;">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <h3 class="mb-0" id="finalizadas">0</h3>
+                  <p class="text-muted mb-0">Finalizadas</p>
+                </div>
+                <div class="text-danger">
+                  <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Licitações Recentes</h5>
+          <button class="btn btn-sm btn-primary" onclick="mostrarSecao('nova-licitacao')">
+            <i class="bi bi-plus"></i> Nova Licitação
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="loading-dashboard" class="loading">
+            <div class="spinner"></div>
+            <p>Carregando dados...</p>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Número</th>
+                  <th>Objeto</th>
+                  <th>Modalidade</th>
+                  <th>Secretaria</th>
+                  <th>Fase</th>
+                  <th>Abertura</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-licitacoes-recentes">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Licitações Section -->
+    <section id="licitacoes" class="content-section" style="display: none;">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Gerenciar Licitações</h5>
+          <div>
+            <button class="btn btn-sm btn-success me-2" onclick="exportarLicitacoes()">
+              <i class="bi bi-download"></i> Exportar
+            </button>
+            <button class="btn btn-sm btn-primary" onclick="mostrarSecao('nova-licitacao')">
+              <i class="bi bi-plus"></i> Nova Licitação
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <input type="text" class="form-control" id="filtro-numero" placeholder="Filtrar por número...">
+            </div>
+            <div class="col-md-3">
+              <select class="form-select" id="filtro-modalidade-admin">
+                <option value="">Todas as modalidades</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select" id="filtro-secretaria-admin">
+                <option value="">Todas as secretarias</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select" id="filtro-fase-admin">
+                <option value="">Todas as fases</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Número</th>
+                  <th>Objeto</th>
+                  <th>Modalidade</th>
+                  <th>Secretaria</th>
+                  <th>Pregoeiro</th>
+                  <th>Fase</th>
+                  <th>Status</th>
+                  <th>Abertura</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-licitacoes-todas">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Nova Licitação Section -->
+    <section id="nova-licitacao" class="content-section" style="display: none;">
+      <form id="form-licitacao" onsubmit="salvarLicitacao(event)">
+        <!-- Informações Básicas -->
+        <div class="form-section">
+          <h5 class="section-title">Informações Básicas</h5>
+          <div class="row">
+            <div class="col-md-3">
+              <label class="form-label">Número da Licitação *</label>
+              <input type="text" class="form-control" name="numero" required>
+              <small class="text-muted">Ex: 001/2024</small>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Ano *</label>
+              <input type="number" class="form-control" name="ano" value="2024" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Modalidade *</label>
+              <select class="form-select" name="modalidade_id" required>
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Secretaria *</label>
+              <select class="form-select" name="secretaria_id" required>
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="row mt-3">
+            <div class="col-md-12">
+              <label class="form-label">Objeto da Licitação *</label>
+              <textarea class="form-control" name="objeto" rows="2" required placeholder="Descreva brevemente o objeto da licitação..."></textarea>
+            </div>
+          </div>
+          
+          <div class="row mt-3">
+            <div class="col-md-12">
+              <label class="form-label">Descrição Detalhada</label>
+              <textarea class="form-control" name="descricao_detalhada" rows="4" placeholder="Descrição completa e detalhada do objeto..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Responsáveis -->
+        <div class="form-section">
+          <h5 class="section-title">Responsáveis</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <label class="form-label">Pregoeiro *</label>
+              <select class="form-select" name="pregoeiro_id" required>
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Fase Inicial *</label>
+              <select class="form-select" name="fase_atual_id" required>
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="row mt-3">
+            <div class="col-md-12">
+              <label class="form-label">Equipe de Apoio</label>
+              <div id="equipe-apoio-licitacao-container">
+                <div class="row mb-2">
+                  <div class="col-md-10">
+                    <select class="form-select" name="equipe_apoio_membro[]">
+                      <option value="">Selecione um membro da equipe...</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger w-100" onclick="removerEquipeLicitacao(this)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="adicionarEquipeLicitacao()">
+                <i class="bi bi-plus"></i> Adicionar Membro
+              </button>
+              <small class="form-text text-muted d-block">Selecione membros da equipe de apoio cadastrada no sistema</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Datas -->
+        <div class="form-section">
+          <h5 class="section-title">Cronograma</h5>
+          <div class="row">
+            <div class="col-md-3">
+              <label class="form-label">Data de Abertura *</label>
+              <input type="date" class="form-control" name="abertura" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Encerramento das Propostas</label>
+              <input type="datetime-local" class="form-control" name="encerramento_proposta">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Sessão Pública</label>
+              <input type="datetime-local" class="form-control" name="sessao_publica">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Prazo de Impugnação</label>
+              <input type="date" class="form-control" name="prazo_impugnacao">
+            </div>
+          </div>
+        </div>
+
+        <!-- Valores -->
+        <div class="form-section">
+          <h5 class="section-title">Informações Financeiras</h5>
+          <div class="row">
+            <div class="col-md-4">
+              <label class="form-label">Valor Estimado (R$)</label>
+              <input type="number" step="0.01" class="form-control" name="valor_estimado" placeholder="0,00">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Critério de Julgamento</label>
+              <select class="form-select" name="criterio_julgamento" id="criterio-julgamento-select">
+                <option value="">Selecione primeiro a modalidade...</option>
+              </select>
+              <small class="form-text text-muted">Critérios baseados na modalidade selecionada</small>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Prazo de Entrega</label>
+              <input type="text" class="form-control" name="prazo_entrega" placeholder="Ex: 30 dias corridos">
+            </div>
+          </div>
+        </div>
+
+        <!-- Informações Adicionais -->
+        <div class="form-section">
+          <h5 class="section-title">Informações Adicionais</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <label class="form-label">Local de Entrega</label>
+              <textarea class="form-control" name="local_entrega" rows="2" placeholder="Endereço completo para entrega..."></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Observações</label>
+              <textarea class="form-control" name="observacoes" rows="2" placeholder="Observações adicionais..."></textarea>
+            </div>
+          </div>
+          
+          <div class="row mt-3">
+            <div class="col-md-6">
+              <label class="form-label">Link do Edital</label>
+              <input type="url" class="form-control" name="link_edital" placeholder="https://...">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Link dos Documentos</label>
+              <input type="url" class="form-control" name="link_documentos" placeholder="https://...">
+            </div>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="form-section">
+          <h5 class="section-title">Status de Publicação</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="publicada" id="publicada">
+                <label class="form-check-label" for="publicada">
+                  Publicar no site público
+                </label>
+                <small class="form-text text-muted d-block">Marque para que a licitação apareça no site público</small>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Status</label>
+              <select class="form-select" name="status">
+                <option value="ativa">Ativa</option>
+                <option value="suspensa">Suspensa</option>
+                <option value="cancelada">Cancelada</option>
+                <option value="finalizada">Finalizada</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="form-section">
+          <button type="submit" class="btn btn-primary me-2">
+            <i class="bi bi-save"></i> Salvar Licitação
+          </button>
+          <button type="button" class="btn btn-outline-secondary me-2" onclick="limparFormulario()">
+            <i class="bi bi-arrow-clockwise"></i> Limpar
+          </button>
+          <button type="button" class="btn btn-outline-primary" onclick="mostrarSecao('licitacoes')">
+            <i class="bi bi-arrow-left"></i> Voltar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Secretarias Section -->
+    <section id="secretarias" class="content-section" style="display: none;">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Nova Secretaria</h5>
+            </div>
+            <div class="card-body">
+              <form id="form-secretaria" onsubmit="salvarSecretaria(event)">
+                <input type="hidden" name="id" id="secretaria-id">
+                <div class="mb-3">
+                  <label class="form-label">Nome *</label>
+                  <input type="text" class="form-control" name="nome" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Sigla</label>
+                  <input type="text" class="form-control" name="sigla" maxlength="10">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Responsável</label>
+                  <input type="text" class="form-control" name="responsavel">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Telefone</label>
+                  <input type="tel" class="form-control" name="telefone">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">E-mail</label>
+                  <input type="email" class="form-control" name="email">
+                </div>
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="ativa" id="secretaria-ativa" checked>
+                    <label class="form-check-label" for="secretaria-ativa">Ativa</label>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary me-2">
+                  <i class="bi bi-save"></i> Salvar
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="limparFormSecretaria()">
+                  <i class="bi bi-arrow-clockwise"></i> Limpar
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Lista de Secretarias</h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Sigla</th>
+                      <th>Responsável</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabela-secretarias">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pregoeiros Section -->
+    <section id="pregoeiros" class="content-section" style="display: none;">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Novo Pregoeiro</h5>
+            </div>
+            <div class="card-body">
+              <form id="form-pregoeiro" onsubmit="salvarPregoeiro(event)">
+                <input type="hidden" name="id" id="pregoeiro-id">
+                <div class="mb-3">
+                  <label class="form-label">Nome *</label>
+                  <input type="text" class="form-control" name="nome" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">CPF</label>
+                  <input type="text" class="form-control" name="cpf" placeholder="000.000.000-00">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Matrícula</label>
+                  <input type="text" class="form-control" name="matricula">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Telefone</label>
+                  <input type="tel" class="form-control" name="telefone">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">E-mail</label>
+                  <input type="email" class="form-control" name="email">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Secretaria</label>
+                  <select class="form-select" name="secretaria_id">
+                    <option value="">Selecione...</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="ativo" id="pregoeiro-ativo" checked>
+                    <label class="form-check-label" for="pregoeiro-ativo">Ativo</label>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary me-2">
+                  <i class="bi bi-save"></i> Salvar
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="limparFormPregoeiro()">
+                  <i class="bi bi-arrow-clockwise"></i> Limpar
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Lista de Pregoeiros</h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Matrícula</th>
+                      <th>Secretaria</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabela-pregoeiros">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modalidades Section -->
+    <section id="modalidades" class="content-section" style="display: none;">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Nova Modalidade</h5>
+            </div>
+            <div class="card-body">
+              <form id="form-modalidade" onsubmit="salvarModalidade(event)">
+                <input type="hidden" name="id" id="modalidade-id">
+                <div class="mb-3">
+                  <label class="form-label">Nome *</label>
+                  <input type="text" class="form-control" name="nome" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Código</label>
+                  <input type="text" class="form-control" name="codigo" maxlength="10" placeholder="Ex: PE, PP, CC">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Descrição</label>
+                  <textarea class="form-control" name="descricao" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Valor Mínimo (R$)</label>
+                  <input type="number" step="0.01" class="form-control" name="valor_minimo">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Valor Máximo (R$)</label>
+                  <input type="number" step="0.01" class="form-control" name="valor_maximo">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Prazo de Publicação (dias)</label>
+                  <input type="number" class="form-control" name="prazo_publicacao">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Critérios de Julgamento</label>
+                  <div id="criterios-container">
+                    <div class="input-group mb-2">
+                      <input type="text" class="form-control" placeholder="Ex: Menor Preço">
+                      <button type="button" class="btn btn-outline-danger" onclick="removerCriterio(this)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-outline-primary" onclick="adicionarCriterio()">
+                    <i class="bi bi-plus"></i> Adicionar Critério
+                  </button>
+                  <small class="form-text text-muted d-block">Ex: Menor Preço, Melhor Técnica, Técnica e Preço</small>
+                </div>
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="ativa" id="modalidade-ativa" checked>
+                    <label class="form-check-label" for="modalidade-ativa">Ativa</label>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary me-2">
+                  <i class="bi bi-save"></i> Salvar
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="limparFormModalidade()">
+                  <i class="bi bi-arrow-clockwise"></i> Limpar
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Lista de Modalidades</h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Código</th>
+                      <th>Critérios</th>
+                      <th>Valor Mín.</th>
+                      <th>Valor Máx.</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabela-modalidades">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Equipe de Apoio Section -->
+    <section id="equipe-apoio" class="content-section" style="display: none;">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Novo Membro</h5>
+            </div>
+            <div class="card-body">
+              <form id="form-equipe-apoio" onsubmit="salvarEquipeApoio(event)">
+                <input type="hidden" name="id" id="equipe-id">
+                <div class="mb-3">
+                  <label class="form-label">Nome Completo *</label>
+                  <input type="text" class="form-control" name="nome" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Função/Cargo *</label>
+                  <input type="text" class="form-control" name="funcao" required placeholder="Ex: Apoio Técnico, Apoio Administrativo">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">CPF</label>
+                  <input type="text" class="form-control" name="cpf" placeholder="000.000.000-00">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Matrícula</label>
+                  <input type="text" class="form-control" name="matricula">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Telefone</label>
+                  <input type="tel" class="form-control" name="telefone">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">E-mail</label>
+                  <input type="email" class="form-control" name="email">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Secretaria</label>
+                  <select class="form-select" name="secretaria_id">
+                    <option value="">Selecione...</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Especialidade</label>
+                  <textarea class="form-control" name="especialidade" rows="2" placeholder="Área de especialização ou competências específicas"></textarea>
+                </div>
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="ativo" id="equipe-ativo" checked>
+                    <label class="form-check-label" for="equipe-ativo">Ativo</label>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary me-2">
+                  <i class="bi bi-save"></i> Salvar
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="limparFormEquipeApoio()">
+                  <i class="bi bi-arrow-clockwise"></i> Limpar
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Lista de Equipe de Apoio</h5>
+              <div>
+                <input type="text" class="form-control form-control-sm" id="filtro-equipe" placeholder="Filtrar por nome ou função..." style="width: 250px;">
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Função</th>
+                      <th>Secretaria</th>
+                      <th>Contato</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabela-equipe-apoio">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="configuracoes" class="content-section" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Configurações do Sistema</h5>
+        </div>
+        <div class="card-body">
+          <p class="text-muted">Funcionalidade em desenvolvimento...</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // ========================================
+    // VERIFICAÇÃO DE AUTENTICAÇÃO
+    // ========================================
+    
+    // Verificar se está logado antes de carregar o painel
+    function verificarAutenticacao() {
+      const usuario = localStorage.getItem('usuario_logado');
+      
+      if (!usuario) {
+        // Não está logado, redirecionar para login
+        window.location.href = 'tela_login.html';
+        return false;
+      }
+      
+      try {
+        const dadosUsuario = JSON.parse(usuario);
+        const agora = new Date().getTime();
+        
+        // Verificar se a sessão não expirou
+        if (dadosUsuario.expiracao && agora >= dadosUsuario.expiracao) {
+          // Sessão expirada
+          localStorage.removeItem('usuario_logado');
+          alert('Sua sessão expirou. Faça login novamente.');
+          window.location.href = 'tela_login.html';
+          return false;
+        }
+        
+        // Atualizar informações do usuário na interface
+        atualizarInfoUsuario(dadosUsuario);
+        return true;
+        
+      } catch (error) {
+        // Erro ao parsear dados, remover e redirecionar
+        localStorage.removeItem('usuario_logado');
+        window.location.href = 'tela_login.html';
+        return false;
+      }
+    }
+    
+    function atualizarInfoUsuario(usuario) {
+      // Atualizar nome do usuário no header se houver
+      const userInfo = document.querySelector('.user-info');
+      if (userInfo) {
+        userInfo.innerHTML = `
+          <i class="bi bi-person-circle me-2"></i>
+          ${usuario.nome} (${usuario.perfil})
+        `;
+      }
+      
+      // Verificar permissões baseadas no perfil
+      configurarPermissoes(usuario.perfil);
+    }
+    
+    function configurarPermissoes(perfil) {
+      // Implementar controle de acesso baseado no perfil
+      switch(perfil) {
+        case 'operador':
+          // Operador: apenas visualizar e criar licitações
+          // Pode ocultar botões de excluir, configurações, etc.
+          break;
+        case 'admin':
+          // Admin: acesso completo exceto configurações críticas
+          break;
+        case 'super_admin':
+          // Super Admin: acesso total
+          break;
+      }
+    }
+    
+    function logout() {
+      if (confirm('Tem certeza que deseja sair?')) {
+        // Remover dados da sessão
+        localStorage.removeItem('usuario_logado');
+        
+        // Registrar logout
+        console.log('Logout realizado em:', new Date().toISOString());
+        
+        // Redirecionar para login
+        window.location.href = 'tela_login.html';
+      }
+    }
+    
+    // ========================================
+    // CONFIGURAÇÃO E INICIALIZAÇÃO
+    // ========================================
+    
+    // Configurações do Supabase - ATUALIZADAS COM SUAS CREDENCIAIS
+    const SUPABASE_URL = 'https://wrayfqfxrxizltezkjrr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyYXlmcWZ4cnhpemx0ZXpranJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3ODA2ODksImV4cCI6MjA2ODM1NjY4OX0.OP6XzwZ840PVj_0Oah0sSOfalWk5SH7xBDcQPVtaT8s';
+    
+    let supabase;
+    let dadosCache = {
+      licitacoes: [],
+      secretarias: [],
+      pregoeiros: [],
+      modalidades: [],
+      fases: [],
+      equipeApoio: []
+    };
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+      // Verificar autenticação primeiro
+      if (!verificarAutenticacao()) {
+        return; // Para execução se não estiver autenticado
+      }
+      
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      carregarDadosIniciais();
+      
+      configurarEventListeners();
+    });
+
+    // ========================================
+    // NAVEGAÇÃO E INTERFACE
+    // ========================================
+    
+    function mostrarSecao(secaoId) {
+      // Ocultar todas as seções
+      document.querySelectorAll('.content-section').forEach(secao => {
+        secao.style.display = 'none';
+      });
+      
+      // Remover classe active de todos os links
+      document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      
+      // Mostrar seção selecionada
+      document.getElementById(secaoId).style.display = 'block';
+      
+      // Adicionar classe active ao link clicado
+      event.target.classList.add('active');
+      
+      // Atualizar título da página
+      const titulos = {
+        'dashboard': 'Dashboard',
+        'licitacoes': 'Gerenciar Licitações',
+        'nova-licitacao': 'Nova Licitação',
+        'secretarias': 'Secretarias',
+        'pregoeiros': 'Pregoeiros',
+        'modalidades': 'Modalidades',
+        'equipe-apoio': 'Equipe de Apoio',
+        'configuracoes': 'Configurações'
+      };
+      
+      document.getElementById('page-title').textContent = titulos[secaoId] || 'Painel Administrativo';
+      
+      // Carregar dados específicos da seção
+      switch(secaoId) {
+        case 'dashboard':
+          carregarDashboard();
+          break;
+        case 'licitacoes':
+          carregarTabelaLicitacoes();
+          break;
+        case 'nova-licitacao':
+          prepararFormularioLicitacao();
+          break;
+        case 'secretarias':
+          carregarTabelaSecretarias();
+          break;
+        case 'pregoeiros':
+          carregarTabelaPregoeiros();
+          preencherSecretariasPregoeiro();
+          break;
+        case 'modalidades':
+          carregarTabelaModalidades();
+          break;
+        case 'equipe-apoio':
+          carregarTabelaEquipeApoio();
+          preencherSecretariasEquipe();
+          break;
+      }
+    }
+
+    function configurarEventListeners() {
+      // Filtros da tabela de licitações
+      ['filtro-numero', 'filtro-modalidade-admin', 'filtro-secretaria-admin', 'filtro-fase-admin'].forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+          elemento.addEventListener('input', filtrarLicitacoes);
+          elemento.addEventListener('change', filtrarLicitacoes);
+        }
+      });
+    }
+
+    // ========================================
+    // CARREGAMENTO DE DADOS
+    // ========================================
+    
+    async function carregarDadosIniciais() {
+      try {
+        document.getElementById('loading-dashboard').style.display = 'block';
+        
+        // Carregar dados em paralelo
+        const [licitacoes, secretarias, pregoeiros, modalidades, fases, equipeApoio] = await Promise.all([
+          carregarLicitacoes(),
+          carregarSecretarias(),
+          carregarPregoeiros(),
+          carregarModalidades(),
+          carregarFases(),
+          carregarEquipeApoio()
+        ]);
+
+        dadosCache = { licitacoes, secretarias, pregoeiros, modalidades, fases, equipeApoio };
+        
+        // Preencher dropdowns
+        preencherDropdowns();
+        
+        // Carregar dashboard
+        carregarDashboard();
+        
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        mostrarErro('Erro ao carregar dados. Verifique a conexão com o banco.');
+      } finally {
+        document.getElementById('loading-dashboard').style.display = 'none';
+      }
+    }
+
+    async function carregarLicitacoes() {
+      const { data, error } = await supabase
+        .from('v_licitacoes_completas')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    }
+
+    async function carregarSecretarias() {
+      const { data, error } = await supabase
+        .from('secretarias')
+        .select('*')
+        .eq('ativa', true)
+        .order('nome');
+
+      if (error) throw error;
+      return data || [];
+    }
+
+    async function carregarPregoeiros() {
+      const { data, error } = await supabase
+        .from('pregoeiros')
+        .select('*, secretarias(nome, sigla)')
+        .eq('ativo', true)
+        .order('nome');
+
+      if (error) throw error;
+      return data || [];
+    }
+
+    async function carregarModalidades() {
+      const { data, error } = await supabase
+        .from('modalidades')
+        .select('*')
+        .eq('ativa', true)
+        .order('nome');
+
+      if (error) throw error;
+      return data || [];
+    }
+
+    async function carregarFases() {
+      const { data, error } = await supabase
+        .from('fases')
+        .select('*')
+        .eq('ativa', true)
+        .order('ordem');
+
+      if (error) throw error;
+      return data || [];
+    }
+
+    async function carregarEquipeApoio() {
+      const { data, error } = await supabase
+        .from('equipe_apoio_geral')
+        .select('*, secretarias(nome, sigla)')
+        .eq('ativo', true)
+        .order('nome');
+
+      if (error) throw error;
+      return data || [];
+    }
+
+    // ========================================
+    // DASHBOARD
+    // ========================================
+    
+    function carregarDashboard() {
+      const licitacoes = dadosCache.licitacoes;
+      
+      // Atualizar estatísticas
+      document.getElementById('total-licitacoes').textContent = licitacoes.length;
+      
+      const emAndamento = licitacoes.filter(l => 
+        l.fase_nome === 'Em Andamento'
+      ).length;
+      document.getElementById('em-andamento').textContent = emAndamento;
+      
+      const publicadas = licitacoes.filter(l => l.publicada).length;
+      document.getElementById('publicadas').textContent = publicadas;
+      
+      const finalizadas = licitacoes.filter(l => 
+        l.fase_nome === 'Finalizada'
+      ).length;
+      document.getElementById('finalizadas').textContent = finalizadas;
+      
+      // Carregar tabela de licitações recentes
+      carregarTabelaRecentes();
+    }
+
+    function carregarTabelaRecentes() {
+      const tbody = document.getElementById('tabela-licitacoes-recentes');
+      const licitacoes = dadosCache.licitacoes.slice(0, 10); // Últimas 10
+      
+      tbody.innerHTML = licitacoes.map(licitacao => {
+        return `
+          <tr>
+            <td><strong>${licitacao.numero}</strong></td>
+            <td>${licitacao.objeto.substring(0, 50)}...</td>
+            <td>${licitacao.modalidade_nome || 'N/A'}</td>
+            <td>${licitacao.secretaria_sigla || 'N/A'}</td>
+            <td><span class="badge" style="background-color: ${licitacao.fase_cor || '#6c757d'}">${licitacao.fase_nome || 'N/A'}</span></td>
+            <td>${formatarData(licitacao.abertura)}</td>
+            <td>
+              <button class="btn btn-sm btn-primary" onclick="editarLicitacao('${licitacao.id}')">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="excluirLicitacao('${licitacao.id}')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ========================================
+    // FORMULÁRIO DE LICITAÇÃO
+    // ========================================
+    
+    function prepararFormularioLicitacao() {
+      // Definir data padrão como hoje
+      const hoje = new Date().toISOString().split('T')[0];
+      document.querySelector('input[name="abertura"]').value = hoje;
+      
+      // Definir ano atual
+      const anoAtual = new Date().getFullYear();
+      document.querySelector('input[name="ano"]').value = anoAtual;
+    }
+
+    function preencherDropdowns() {
+      // Preencher modalidades
+      const selectModalidades = document.querySelectorAll('select[name="modalidade_id"], #filtro-modalidade-admin');
+      selectModalidades.forEach(select => {
+        if (select.id === 'filtro-modalidade-admin') {
+          select.innerHTML = '<option value="">Todas as modalidades</option>';
+        } else {
+          select.innerHTML = '<option value="">Selecione...</option>';
+        }
+        
+        dadosCache.modalidades.forEach(modalidade => {
+          select.innerHTML += `<option value="${modalidade.id}">${modalidade.nome}</option>`;
+        });
+      });
+
+      // Preencher secretarias
+      const selectSecretarias = document.querySelectorAll('select[name="secretaria_id"], #filtro-secretaria-admin');
+      selectSecretarias.forEach(select => {
+        if (select.id === 'filtro-secretaria-admin') {
+          select.innerHTML = '<option value="">Todas as secretarias</option>';
+        } else {
+          select.innerHTML = '<option value="">Selecione...</option>';
+        }
+        
+        dadosCache.secretarias.forEach(secretaria => {
+          select.innerHTML += `<option value="${secretaria.id}">${secretaria.nome}</option>`;
+        });
+      });
+
+      // Preencher pregoeiros
+      const selectPregoeiros = document.querySelectorAll('select[name="pregoeiro_id"]');
+      selectPregoeiros.forEach(select => {
+        select.innerHTML = '<option value="">Selecione...</option>';
+        dadosCache.pregoeiros.forEach(pregoeiro => {
+          select.innerHTML += `<option value="${pregoeiro.id}">${pregoeiro.nome}</option>`;
+        });
+      });
+
+      // Preencher fases
+      const selectFases = document.querySelectorAll('select[name="fase_atual_id"], #filtro-fase-admin');
+      selectFases.forEach(select => {
+        if (select.id === 'filtro-fase-admin') {
+          select.innerHTML = '<option value="">Todas as fases</option>';
+        } else {
+          select.innerHTML = '<option value="">Selecione...</option>';
+        }
+        
+        dadosCache.fases.forEach(fase => {
+          select.innerHTML += `<option value="${fase.id}">${fase.nome}</option>`;
+        });
+      });
+
+      // Preencher equipe de apoio para licitações
+      preencherEquipeApoioLicitacao();
+
+      // Configurar evento de mudança de modalidade para critérios
+      const selectModalidade = document.querySelector('select[name="modalidade_id"]');
+      if (selectModalidade) {
+        selectModalidade.addEventListener('change', atualizarCriteriosJulgamento);
+      }
+    }
+
+    function preencherEquipeApoioLicitacao() {
+      const selects = document.querySelectorAll('select[name="equipe_apoio_membro[]"]');
+      selects.forEach(select => {
+        select.innerHTML = '<option value="">Selecione um membro da equipe...</option>';
+        dadosCache.equipeApoio.forEach(membro => {
+          const secretaria = membro.secretarias;
+          const sigla = secretaria ? ` (${secretaria.sigla})` : '';
+          select.innerHTML += `<option value="${membro.id}">${membro.nome} - ${membro.funcao}${sigla}</option>`;
+        });
+      });
+    }
+
+    function atualizarCriteriosJulgamento() {
+      const modalidadeId = this.value;
+      const selectCriterios = document.getElementById('criterio-julgamento-select');
+      
+      selectCriterios.innerHTML = '<option value="">Selecione...</option>';
+      
+      if (modalidadeId) {
+        const modalidade = dadosCache.modalidades.find(m => m.id === modalidadeId);
+        if (modalidade && modalidade.criterios_julgamento) {
+          const criterios = modalidade.criterios_julgamento.split(', ');
+          criterios.forEach(criterio => {
+            selectCriterios.innerHTML += `<option value="${criterio}">${criterio}</option>`;
+          });
+        }
+      }
+    }
+
+    // ========================================
+    // FUNÇÕES DA EQUIPE DE APOIO NA LICITAÇÃO
+    // ========================================
+    
+    function adicionarEquipeLicitacao() {
+      const container = document.getElementById('equipe-apoio-licitacao-container');
+      const novoMembro = document.createElement('div');
+      novoMembro.className = 'row mb-2';
+      novoMembro.innerHTML = `
+        <div class="col-md-10">
+          <select class="form-select" name="equipe_apoio_membro[]">
+            <option value="">Selecione um membro da equipe...</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="button" class="btn btn-outline-danger w-100" onclick="removerEquipeLicitacao(this)">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      `;
+      container.appendChild(novoMembro);
+      
+      // Preencher o novo select
+      const novoSelect = novoMembro.querySelector('select');
+      dadosCache.equipeApoio.forEach(membro => {
+        const secretaria = membro.secretarias;
+        const sigla = secretaria ? ` (${secretaria.sigla})` : '';
+        novoSelect.innerHTML += `<option value="${membro.id}">${membro.nome} - ${membro.funcao}${sigla}</option>`;
+      });
+    }
+
+    function removerEquipeLicitacao(botao) {
+      botao.closest('.row').remove();
+    }
+
+    // ========================================
+    // CRUD DE LICITAÇÕES
+    // ========================================
+    
+    async function salvarLicitacao(event) {
+      event.preventDefault();
+      
+      const formData = new FormData(event.target);
+      const dados = Object.fromEntries(formData.entries());
+      
+      // Converter checkbox para boolean
+      dados.publicada = formData.has('publicada');
+      
+      // Coletar equipe de apoio
+      const equipeMembros = Array.from(document.querySelectorAll('select[name="equipe_apoio_membro[]"]'))
+        .map(select => select.value)
+        .filter(value => value);
+      
+      try {
+        const { data: licitacao, error } = await supabase
+          .from('licitacoes')
+          .insert([dados])
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        // Inserir equipe de apoio se houver
+        if (equipeMembros.length > 0) {
+          const equipeData = equipeMembros.map(membroId => ({
+            licitacao_id: licitacao.id,
+            equipe_apoio_id: membroId
+          }));
+          
+          const { error: equipeError } = await supabase
+            .from('licitacao_equipe_apoio')
+            .insert(equipeData);
+            
+          if (equipeError) throw equipeError;
+        }
+        
+        mostrarSucesso('Licitação salva com sucesso!');
+        limparFormulario();
+        carregarDadosIniciais();
+        
+      } catch (error) {
+        console.error('Erro ao salvar:', error);
+        mostrarErro('Erro ao salvar licitação: ' + error.message);
+      }
+    }
+
+    async function excluirLicitacao(id) {
+      if (!confirm('Tem certeza que deseja excluir esta licitação?')) return;
+      
+      try {
+        const { error } = await supabase
+          .from('licitacoes')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+        
+        mostrarSucesso('Licitação excluída com sucesso!');
+        carregarDadosIniciais();
+        
+      } catch (error) {
+        console.error('Erro ao excluir:', error);
+        mostrarErro('Erro ao excluir licitação: ' + error.message);
+      }
+    }
+
+    function editarLicitacao(id) {
+      // Implementar edição
+      console.log('Editar licitação:', id);
+      mostrarSecao('nova-licitacao');
+    }
+
+    function limparFormulario() {
+      document.getElementById('form-licitacao').reset();
+      prepararFormularioLicitacao();
+    }
+
+    // ========================================
+    // CRUD - SECRETARIAS
+    // ========================================
+    
+    function carregarTabelaSecretarias() {
+      const tbody = document.getElementById('tabela-secretarias');
+      const secretarias = dadosCache.secretarias;
+      
+      tbody.innerHTML = secretarias.map(secretaria => `
+        <tr>
+          <td><strong>${secretaria.nome}</strong></td>
+          <td>${secretaria.sigla || 'N/A'}</td>
+          <td>${secretaria.responsavel || 'N/A'}</td>
+          <td>
+            <span class="badge ${secretaria.ativa ? 'bg-success' : 'bg-danger'}">
+              ${secretaria.ativa ? 'Ativa' : 'Inativa'}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary me-1" onclick="editarSecretaria('${secretaria.id}')">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" onclick="excluirSecretaria('${secretaria.id}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function salvarSecretaria(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const dados = Object.fromEntries(formData.entries());
+      dados.ativa = formData.has('ativa');
+      
+      try {
+        if (dados.id) {
+          // Atualizar
+          const { error } = await supabase
+            .from('secretarias')
+            .update(dados)
+            .eq('id', dados.id);
+          if (error) throw error;
+        } else {
+          // Inserir
+          delete dados.id;
+          const { error } = await supabase
+            .from('secretarias')
+            .insert([dados]);
+          if (error) throw error;
+        }
+        
+        mostrarSucesso('Secretaria salva com sucesso!');
+        limparFormSecretaria();
+        dadosCache.secretarias = await carregarSecretarias();
+        carregarTabelaSecretarias();
+        preencherDropdowns();
+      } catch (error) {
+        mostrarErro('Erro ao salvar secretaria: ' + error.message);
+      }
+    }
+
+    function editarSecretaria(id) {
+      const secretaria = dadosCache.secretarias.find(s => s.id === id);
+      if (secretaria) {
+        document.getElementById('secretaria-id').value = secretaria.id;
+        document.querySelector('#form-secretaria input[name="nome"]').value = secretaria.nome;
+        document.querySelector('#form-secretaria input[name="sigla"]').value = secretaria.sigla || '';
+        document.querySelector('#form-secretaria input[name="responsavel"]').value = secretaria.responsavel || '';
+        document.querySelector('#form-secretaria input[name="telefone"]').value = secretaria.telefone || '';
+        document.querySelector('#form-secretaria input[name="email"]').value = secretaria.email || '';
+        document.querySelector('#form-secretaria input[name="ativa"]').checked = secretaria.ativa;
+      }
+    }
+
+    async function excluirSecretaria(id) {
+      if (!confirm('Tem certeza que deseja excluir esta secretaria?')) return;
+      
+      try {
+        const { error } = await supabase
+          .from('secretarias')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+        
+        mostrarSucesso('Secretaria excluída com sucesso!');
+        dadosCache.secretarias = await carregarSecretarias();
+        carregarTabelaSecretarias();
+        preencherDropdowns();
+      } catch (error) {
+        mostrarErro('Erro ao excluir secretaria: ' + error.message);
+      }
+    }
+
+    function limparFormSecretaria() {
+      document.getElementById('form-secretaria').reset();
+      document.getElementById('secretaria-id').value = '';
+      document.querySelector('#form-secretaria input[name="ativa"]').checked = true;
+    }
+
+    // ========================================
+    // CRUD - PREGOEIROS
+    // ========================================
+    
+    function carregarTabelaPregoeiros() {
+      const tbody = document.getElementById('tabela-pregoeiros');
+      const pregoeiros = dadosCache.pregoeiros;
+      
+      tbody.innerHTML = pregoeiros.map(pregoeiro => {
+        const secretaria = pregoeiro.secretarias;
+        return `
+          <tr>
+            <td><strong>${pregoeiro.nome}</strong></td>
+            <td>${pregoeiro.matricula || 'N/A'}</td>
+            <td>${secretaria ? secretaria.sigla : 'N/A'}</td>
+            <td>
+              <span class="badge ${pregoeiro.ativo ? 'bg-success' : 'bg-danger'}">
+                ${pregoeiro.ativo ? 'Ativo' : 'Inativo'}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-1" onclick="editarPregoeiro('${pregoeiro.id}')">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="excluirPregoeiro('${pregoeiro.id}')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function preencherSecretariasPregoeiro() {
+      const select = document.querySelector('#form-pregoeiro select[name="secretaria_id"]');
+      select.innerHTML = '<option value="">Selecione...</option>';
+      dadosCache.secretarias.forEach(secretaria => {
+        select.innerHTML += `<option value="${secretaria.id}">${secretaria.nome}</option>`;
+      });
+    }
+
+    async function salvarPregoeiro(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const dados = Object.fromEntries(formData.entries());
+      dados.ativo = formData.has('ativo');
+      
+      try {
+        if (dados.id) {
+          const { error } = await supabase
+            .from('pregoeiros')
+            .update(dados)
+            .eq('id', dados.id);
+          if (error) throw error;
+        } else {
+          delete dados.id;
+          const { error } = await supabase
+            .from('pregoeiros')
+            .insert([dados]);
+          if (error) throw error;
+        }
+        
+        mostrarSucesso('Pregoeiro salvo com sucesso!');
+        limparFormPregoeiro();
+        dadosCache.pregoeiros = await carregarPregoeiros();
+        carregarTabelaPregoeiros();
+        preencherDropdowns();
+      } catch (error) {
+        mostrarErro('Erro ao salvar pregoeiro: ' + error.message);
+      }
+    }
+
+    function editarPregoeiro(id) {
+      const pregoeiro = dadosCache.pregoeiros.find(p => p.id === id);
+      if (pregoeiro) {
+        document.getElementById('pregoeiro-id').value = pregoeiro.id;
+        document.querySelector('#form-pregoeiro input[name="nome"]').value = pregoeiro.nome;
+        document.querySelector('#form-pregoeiro input[name="cpf"]').value = pregoeiro.cpf || '';
+        document.querySelector('#form-pregoeiro input[name="matricula"]').value = pregoeiro.matricula || '';
+        document.querySelector('#form-pregoeiro input[name="telefone"]').value = pregoeiro.telefone || '';
+        document.querySelector('#form-pregoeiro input[name="email"]').value = pregoeiro.email || '';
+        document.querySelector('#form-pregoeiro select[name="secretaria_id"]').value = pregoeiro.secretaria_id || '';
+        document.querySelector('#form-pregoeiro input[name="ativo"]').checked = pregoeiro.ativo;
+      }
+    }
+
+    async function excluirPregoeiro(id) {
+      if (!confirm('Tem certeza que deseja excluir este pregoeiro?')) return;
+      
+      try {
+        const { error } = await supabase
+          .from('pregoeiros')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+        
+        mostrarSucesso('Pregoeiro excluído com sucesso!');
+        dadosCache.pregoeiros = await carregarPregoeiros();
+        carregarTabelaPregoeiros();
+        preencherDropdowns();
+      } catch (error) {
+        mostrarErro('Erro ao excluir pregoeiro: ' + error.message);
+      }
+    }
+
+    function limparFormPregoeiro() {
+      document.getElementById('form-pregoeiro').reset();
+      document.getElementById('pregoeiro-id').value = '';
+      document.querySelector('#form-pregoeiro input[name="ativo"]').checked = true;
+    }
+
+    // ========================================
+    // CRUD - MODALIDADES
+    // ========================================
+    
+    function carregarTabelaModalidades() {
+      const tbody = document.getElementById('tabela-modalidades');
+      const modalidades = dadosCache.modalidades;
+      
+      tbody.innerHTML = modalidades.map(modalidade => `
+        <tr>
+          <td><strong>${modalidade.nome}</strong></td>
+          <td>${modalidade.codigo || 'N/A'}</td>
+          <td>${modalidade.criterios_julgamento || 'N/A'}</td>
+          <td>${modalidade.valor_minimo ? 'R$ ' + parseFloat(modalidade.valor_minimo).toLocaleString('pt-BR') : 'N/A'}</td>
+          <td>${modalidade.valor_maximo ? 'R$ ' + parseFloat(modalidade.valor_maximo).toLocaleString('pt-BR') : 'N/A'}</td>
+          <td>
+            <span class="badge ${modalidade.ativa ? 'bg-success' : 'bg-danger'}">
+              ${modalidade.ativa ? 'Ativa' : 'Inativa'}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary me-1" onclick="editarModalidade('${modalidade.id}')">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" onclick="excluirModalidade('${modalidade.id}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function salvarModalidade(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const dados = Object.fromEntries(formData.entries());
+      dados.ativa = formData.has('ativa');
+      
+      // Coletar critérios de julgamento
+      const criterios = [];
+      document.querySelectorAll('#criterios-container input').forEach(input => {
+        if (input.value.trim()) {
+          criterios.push(input.value.trim());
+        }
+      });
+      dados.criterios_julgamento = criterios.join(', ');
+      
+      try {
+        if (dados.id) {
+          const { error } = await supabase
+            .from('modalidades')
+            .update(dados)
+            .eq('id', dados.id);
+          if (error) throw error;
+        } else {
+          delete dados.id;
+          const { error } = await supabase
+            .from('modalidades')
+            .insert([dados]);
+          if (error) throw error;
+        }
+        
+        mostrarSucesso('Modalidade salva com sucesso!');
+        limparFormModalidade();
+        dadosCache.modalidades = await carregarModalidades();
+        carregarTabelaModalidades();
+        preencherDropdowns();
+      } catch (error) {
+        mostrarErro('Erro ao salvar modalidade: ' + error.message);
+      }
+    }
+
+    function editarModalidade(id) {
+      const modalidade = dadosCache.modalidades.find(m => m.id === id);
+      if (modalidade) {
+        document.getElementById('modalidade-id').value = modalidade.id;
+        document.querySelector('#form-modalidade input[name="nome"]').value = modalidade.nome;
+        document.querySelector('#form-modalidade input[name="codigo"]').value = modalidade.codigo || '';
+        document.querySelector('#form-modalidade textarea[name="descricao"]').value = modalidade.descricao || '';
+        document.querySelector('#form-modalidade input[name="valor_minimo"]').value = modalidade.valor_minimo || '';
+        document.querySelector('#form-modalidade input[name="valor_maximo"]').value = modalidade.valor_maximo || '';
+        document.querySelector('#form-modalidade input[name="prazo_publicacao"]').value = modalidade.prazo_publicacao || '';
+        document.querySelector('#form-modalidade input[name="ativa"]').checked = modalidade.ativa;
+        
+        // Carregar critérios
+        const container = document.getElementById('criterios-container');
+        container.innerHTML = '';
+        if (modalidade.criterios_julgamento) {
+          const criterios = modalidade.criterios_julgamento.split(', ');
+          criterios.forEach(criterio => {
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2';
+            div.innerHTML = `
+              <input type="text" class="form-control" value="${criterio}">
+              <button type="button" class="btn btn-outline-danger" onclick="removerCriterio(this)">
+                <i class="bi bi-trash"></i>
+              </button>
+            `;
+            container.appendChild(div);
+          });
+        } else {
+          adicionarCriterio();
+        }
+      }
+    }
+
+    function adicionarCriterio() {
+      const container = document.getElementById('criterios-container');
+      const novoCriterio = document.createElement('div');
+      novoCriterio.className = 'input-group mb-2';
+      novoCriterio.innerHTML = `
+        <input type="text" class="form-control" placeholder="Ex: Menor Preço">
+        <button type="button" class="btn btn-outline-danger" onclick="removerCriterio(this)">
+          <i class="bi bi-trash"></i>
+        </button>
+      `;
+      container.appendChild(novoCriterio);
+    }
+
+    function removerCriterio(botao) {
+      botao.closest('.input-group').remove();
+    }
+
+    function limparFormModalidade() {
+      document.getElementById('form-modalidade').reset();
+      document.getElementById('modalidade-id').value = '';
+      document.querySelector('#form-modalidade input[name="ativa"]').checked = true;
+      
+      // Limpar e adicionar um critério padrão
+      document.getElementById('criterios-container').innerHTML = '';
+      adicionarCriterio();
+    }
+
+    // ========================================
+    // CRUD - EQUIPE DE APOIO
+    // ========================================
+    
+    function carregarTabelaEquipeApoio() {
+      const tbody = document.getElementById('tabela-equipe-apoio');
+      const equipe = dadosCache.equipeApoio || [];
+      
+      tbody.innerHTML = equipe.map(membro => {
+        const secretaria = membro.secretarias;
+        return `
+          <tr>
+            <td><strong>${membro.nome}</strong></td>
+            <td>${membro.funcao}</td>
+            <td>${secretaria ? secretaria.sigla : 'N/A'}</td>
+            <td>
+              ${membro.telefone ? `<small><i class="bi bi-telephone"></i> ${membro.telefone}</small><br>` : ''}
+              ${membro.email ? `<small><i class="bi bi-envelope"></i> ${membro.email}</small>` : ''}
+            </td>
+            <td>
+              <span class="badge ${membro.ativo ? 'bg-success' : 'bg-danger'}">
+                ${membro.ativo ? 'Ativo' : 'Inativo'}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-1" onclick="editarEquipeApoio('${membro.id}')">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="excluirEquipeApoio('${membro.id}')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function preencherSecretariasEquipe() {
+      const select = document.querySelector('#form-equipe-apoio select[name="secretaria_id"]');
+      select.innerHTML = '<option value="">Selecione...</option>';
+      dadosCache.secretarias.forEach(secretaria => {
+        select.innerHTML += `<option value="${secretaria.id}">${secretaria.nome}</option>`;
+      });
+    }
+
+    async function salvarEquipeApoio(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const dados = Object.fromEntries(formData.entries());
+      dados.ativo = formData.has('ativo');
+      
+      try {
+        if (dados.id) {
+          const { error } = await supabase
+            .from('equipe_apoio_geral')
+            .update(dados)
+            .eq('id', dados.id);
+          if (error) throw error;
+        } else {
+          delete dados.id;
+          const { error } = await supabase
+            .from('equipe_apoio_geral')
+            .insert([dados]);
+          if (error) throw error;
+        }
+        
+        mostrarSucesso('Membro da equipe salvo com sucesso!');
+        limparFormEquipeApoio();
+        dadosCache.equipeApoio = await carregarEquipeApoio();
+        carregarTabelaEquipeApoio();
+      } catch (error) {
+        mostrarErro('Erro ao salvar membro: ' + error.message);
+      }
+    }
+
+    function editarEquipeApoio(id) {
+      const membro = dadosCache.equipeApoio.find(e => e.id === id);
+      if (membro) {
+        document.getElementById('equipe-id').value = membro.id;
+        document.querySelector('#form-equipe-apoio input[name="nome"]').value = membro.nome;
+        document.querySelector('#form-equipe-apoio input[name="funcao"]').value = membro.funcao;
+        document.querySelector('#form-equipe-apoio input[name="cpf"]').value = membro.cpf || '';
+        document.querySelector('#form-equipe-apoio input[name="matricula"]').value = membro.matricula || '';
+        document.querySelector('#form-equipe-apoio input[name="telefone"]').value = membro.telefone || '';
+        document.querySelector('#form-equipe-apoio input[name="email"]').value = membro.email || '';
+        document.querySelector('#form-equipe-apoio select[name="secretaria_id"]').value = membro.secretaria_id || '';
+        document.querySelector('#form-equipe-apoio textarea[name="especialidade"]').value = membro.especialidade || '';
+        document.querySelector('#form-equipe-apoio input[name="ativo"]').checked = membro.ativo;
+      }
+    }
+
+    async function excluirEquipeApoio(id) {
+      if (!confirm('Tem certeza que deseja excluir este membro?')) return;
+      
+      try {
+        const { error } = await supabase
+          .from('equipe_apoio_geral')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+        
+        mostrarSucesso('Membro excluído com sucesso!');
+        dadosCache.equipeApoio = await carregarEquipeApoio();
+        carregarTabelaEquipeApoio();
+      } catch (error) {
+        mostrarErro('Erro ao excluir membro: ' + error.message);
+      }
+    }
+
+    function limparFormEquipeApoio() {
+      document.getElementById('form-equipe-apoio').reset();
+      document.getElementById('equipe-id').value = '';
+      document.querySelector('#form-equipe-apoio input[name="ativo"]').checked = true;
+    }
+
+    // ========================================
+    // OUTRAS FUNÇÕES
+    // ========================================
+    
+    function carregarTabelaLicitacoes() {
+      const tbody = document.getElementById('tabela-licitacoes-todas');
+      const licitacoes = dadosCache.licitacoes;
+      
+      tbody.innerHTML = licitacoes.map(licitacao => {
+        return `
+          <tr>
+            <td><strong>${licitacao.numero}</strong></td>
+            <td>${licitacao.objeto.substring(0, 40)}...</td>
+            <td>${licitacao.modalidade_nome || 'N/A'}</td>
+            <td>${licitacao.secretaria_sigla || 'N/A'}</td>
+            <td>${licitacao.pregoeiro_nome || 'N/A'}</td>
+            <td><span class="badge" style="background-color: ${licitacao.fase_cor || '#6c757d'}">${licitacao.fase_nome || 'N/A'}</span></td>
+            <td><span class="badge ${licitacao.status === 'ativa' ? 'bg-success' : 'bg-danger'}">${licitacao.status}</span></td>
+            <td>${formatarData(licitacao.abertura)}</td>
+            <td>
+              <button class="btn btn-sm btn-primary" onclick="editarLicitacao('${licitacao.id}')">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="excluirLicitacao('${licitacao.id}')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ========================================
+    // UTILITÁRIOS
+    // ========================================
+    
+    function formatarData(data) {
+      if (!data) return 'N/A';
+      return new Date(data).toLocaleDateString('pt-BR');
+    }
+
+    function mostrarSucesso(mensagem) {
+      // Implementar toast de sucesso
+      alert('✅ ' + mensagem);
+    }
+
+    function mostrarErro(mensagem) {
+      // Implementar toast de erro
+      alert('❌ ' + mensagem);
+    }
+
+    function sincronizarDados() {
+      carregarDadosIniciais();
+      mostrarSucesso('Dados sincronizados!');
+    }
+
+    function exportarLicitacoes() {
+      // Implementar exportação
+      console.log('Exportar licitações');
+      mostrarSucesso('Funcionalidade em desenvolvimento!');
+    }
+
+    function filtrarLicitacoes() {
+      // Implementar filtros
+      console.log('Filtrar licitações');
+    }
+  </script>
+</body>
+</html>
