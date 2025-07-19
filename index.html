@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Licitações em Andamento - Prefeitura de Mirassol d'Oeste</title>
+  <meta name="description" content="Acompanhe as licitações em andamento da Prefeitura de Mirassol d'Oeste - MT. Transparência e acesso à informação.">
+  <meta name="keywords" content="licitações, Mirassol d'Oeste, transparência, governo, pregão">
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --secondary-color: #6c757d;
+      --success-color: #198754;
+      --info-color: #0dcaf0;
+      --warning-color: #ffc107;
+      --danger-color: #dc3545;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8f9fa;
+      padding-bottom: 40px;
+    }
+
+    .custom-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #0b5ed7 100%);
+      color: white;
+      box-shadow: 0 4px 20px rgba(13, 110, 253, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 3px solid rgba(255,255,255,0.1);
+    }
+
+    .header-top {
+      background: rgba(0,0,0,0.1);
+      padding: 8px 0;
+      font-size: 0.875rem;
+    }
+
+    .header-main {
+      padding: 20px 0;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo-container {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    .header-text h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .header-text p {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin-bottom: 0;
+    }
+
+    .accessibility-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .accessibility-controls .btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 0.875rem;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .accessibility-controls .btn:hover {
+      background: rgba(255,255,255,0.25);
+      transform: translateY(-1px);
+    }
+
+    .breadcrumb-section {
+      background: white;
+      padding: 15px 0;
+      border-bottom: 1px solid #e9ecef;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .stats-section {
+      padding: 40px 0;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(13, 110, 253, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), #0b5ed7);
+    }
+
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 8px;
+    }
+
+    .stat-description {
+      font-size: 0.875rem;
+      color: #6c757d;
+    }
+
+    .filters-section {
+      background: white;
+      padding: 30px 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      position: relative;
+    }
+
+    .filters-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border: 1px solid #e9ecef;
+    }
+
+    .filter-group {
+      margin-bottom: 20px;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .form-control, .form-select {
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+      background: white;
+    }
+
+    .table-section {
+      padding: 40px 0;
+    }
+
+    .table-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border: 1px solid #e9ecef;
+    }
+
+    .table-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #0b5ed7 100%);
+      color: white;
+      padding: 25px 30px;
+      border-bottom: none;
+    }
+
+    .table-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .table-subtitle {
+      opacity: 0.9;
+      margin-bottom: 0;
+    }
+
+    .table-responsive {
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+    }
+
+    .table {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+    }
+
+    .table thead th {
+      background: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+      color: #495057;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+      padding: 20px 15px;
+      border-top: none;
+    }
+
+    .table tbody td {
+      padding: 20px 15px;
+      vertical-align: middle;
+      border-top: 1px solid #f1f3f4;
+    }
+
+    .table tbody tr {
+      transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+      background-color: #f8f9fa;
+      transform: scale(1.01);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .badge {
+      font-size: 0.8rem;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .badge.modalidade {
+      background: linear-gradient(135deg, var(--primary-color), #0b5ed7);
+      color: white;
+    }
+
+    .badge.fase {
+      background: linear-gradient(135deg, var(--secondary-color), #495057);
+      color: white;
+    }
+
+    .btn-export {
+      background: linear-gradient(135deg, var(--success-color), #157347);
+      border: none;
+      color: white;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+    }
+
+    .btn-export:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(25, 135, 84, 0.4);
+      color: white;
+    }
+
+    .btn-clear {
+      background: transparent;
+      border: 2px solid var(--secondary-color);
+      color: var(--secondary-color);
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-clear:hover {
+      background: var(--secondary-color);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .btn-whatsapp {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 16px 24px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-whatsapp:hover {
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(37, 211, 102, 0.5);
+    }
+
+    .btn-whatsapp svg {
+      width: 22px;
+      height: 22px;
+      margin-right: 10px;
+      fill: white;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6c757d;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(5px);
+    }
+
+    .spinner-custom {
+      width: 60px;
+      height: 60px;
+      border: 4px solid #f3f3f4;
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-main {
+        padding: 15px 0;
+      }
+      
+      .logo-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+      }
+      
+      .header-text h1 {
+        font-size: 1.5rem;
+      }
+      
+      .stat-card {
+        margin-bottom: 20px;
+        padding: 20px;
+      }
+      
+      .stat-number {
+        font-size: 2.5rem;
+      }
+      
+      .filters-card {
+        padding: 20px;
+      }
+      
+      .table-responsive {
+        font-size: 0.85rem;
+      }
+      
+      .btn-whatsapp {
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        padding: 0;
+        bottom: 30px;
+      }
+      
+      .btn-whatsapp svg {
+        margin-right: 0;
+        width: 26px;
+        height: 26px;
+      }
+      
+      body {
+        padding-bottom: 20px;
+      }
+    }
+
+    .alto-contraste {
+      background: #000 !important;
+      color: #fff !important;
+    }
+
+    .alto-contraste .custom-header {
+      background: #333 !important;
+    }
+
+    .alto-contraste .table {
+      background: #000 !important;
+      color: #fff !important;
+    }
+
+    .alto-contraste .table thead th {
+      background: #333 !important;
+      color: #fff !important;
+    }
+
+    .alto-contraste .table tbody tr:hover {
+      background: #333 !important;
+    }
+
+    .alto-contraste .form-control,
+    .alto-contraste .form-select {
+      background: #333 !important;
+      color: #fff !important;
+      border-color: #666 !important;
+    }
+
+    .alto-contraste .stat-card {
+      background: #333 !important;
+      color: #fff !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="text-center">
+      <div class="spinner-custom"></div>
+      <p class="mt-3 text-muted">Carregando licitações...</p>
+    </div>
+  </div>
+
+  <header class="custom-header">
+    <div class="header-top">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <div class="d-flex align-items-center gap-3">
+              <i class="bi bi-geo-alt"></i>
+              <small>Rua Antônio Tavares, 3310, Centro - Mirassol d'Oeste/MT</small>
+              <span class="d-none d-md-inline">|</span>
+              <i class="bi bi-telephone d-none d-md-inline"></i>
+              <small class="d-none d-md-inline">(65) 99953-0883</small>
+            </div>
+          </div>
+          <div class="col-md-4 text-md-end">
+            <small>
+              <i class="bi bi-clock"></i>
+              Atualizado em: <span id="ultima-atualizacao">--</span>
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-main">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-lg-8">
+            <div class="logo-section">
+              <div class="logo-container">
+                <img src="logo-mirassol.png" alt="Logo Secretaria de Administração" style="height: 80px; filter: brightness(0) invert(1);">
+              </div>
+              <div class="header-text">
+                <h1>Licitações em Andamento</h1>
+                <p>Secretaria de Administração - Prefeitura de Mirassol d'Oeste</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <div class="accessibility-controls">
+              <button id="btnAumentarFonte" class="btn" title="Aumentar fonte">
+                <i class="bi bi-plus-lg"></i> A
+              </button>
+              <button id="btnDiminuirFonte" class="btn" title="Diminuir fonte">
+                <i class="bi bi-dash-lg"></i> A
+              </button>
+              <button id="btnContraste" class="btn" title="Alto contraste">
+                <i class="bi bi-circle-half"></i>
+              </button>
+              <a href="login.html" class="btn" title="Área administrativa">
+                <i class="bi bi-gear"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="breadcrumb-section">
+    <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item">
+            <a href="#" class="text-decoration-none">
+              <i class="bi bi-house"></i> Início
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="#" class="text-decoration-none">Transparência</a>
+          </li>
+          <li class="breadcrumb-item active">Licitações em Andamento</li>
+        </ol>
+      </nav>
+    </div>
+  </section>
+
+  <section class="stats-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="stat-card fade-in" id="card-total" style="cursor: pointer;">
+            <div class="stat-number" id="total-licitacoes">0</div>
+            <div class="stat-label">Total de Licitações</div>
+            <div class="stat-description">Processos ativos no sistema</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="stat-card fade-in" id="card-em-andamento" style="cursor: pointer;">
+            <div class="stat-number" id="em-andamento">0</div>
+            <div class="stat-label">Em Andamento</div>
+            <div class="stat-description">Aguardando propostas</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="stat-card fade-in" id="card-publicadas" style="cursor: pointer;">
+            <div class="stat-number" id="publicadas-hoje">0</div>
+            <div class="stat-label">Publicadas</div>
+            <div class="stat-description">Editais disponíveis</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="stat-card fade-in">
+            <div class="stat-number" id="modalidades-ativas">0</div>
+            <div class="stat-label">Modalidades</div>
+            <div class="stat-description">Tipos disponíveis</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="filters-section">
+    <div class="container">
+      <div class="filters-card fade-in">
+        <div class="row align-items-end">
+          <div class="col-lg-3 col-md-6">
+            <div class="filter-group">
+              <label for="busca">
+                <i class="bi bi-search"></i> Buscar Licitação
+              </label>
+              <input type="text" id="busca" class="form-control" placeholder="Digite o número ou objeto...">
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-6">
+            <div class="filter-group">
+              <label for="filtroModalidade">
+                <i class="bi bi-tags"></i> Modalidade
+              </label>
+              <select id="filtroModalidade" class="form-select">
+                <option value="">Todas</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-6">
+            <div class="filter-group">
+              <label for="filtroSecretaria">
+                <i class="bi bi-building"></i> Secretaria
+              </label>
+              <select id="filtroSecretaria" class="form-select">
+                <option value="">Todas</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-6">
+            <div class="filter-group">
+              <label for="filtroFase">
+                <i class="bi bi-clipboard-check"></i> Fase
+              </label>
+              <select id="filtroFase" class="form-select">
+                <option value="">Todas</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-12">
+            <div class="filter-group">
+              <label>&nbsp;</label>
+              <div class="d-flex gap-2">
+                <button class="btn btn-export flex-fill" onclick="exportarExcel()">
+                  <i class="bi bi-download"></i> Exportar
+                </button>
+                <button class="btn btn-clear" onclick="limparFiltros()" title="Limpar filtros">
+                  <i class="bi bi-arrow-clockwise"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <div class="container">
+      <div class="table-card fade-in">
+        <div class="table-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="table-title">
+                <i class="bi bi-file-text me-2"></i>
+                Licitações Disponíveis
+              </div>
+              <div class="table-subtitle">
+                Acompanhe os processos licitatórios em tempo real
+              </div>
+            </div>
+            <div class="d-none d-md-block">
+              <span class="badge bg-light text-dark px-3 py-2">
+                <i class="bi bi-clock"></i>
+                Atualização automática
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th><i class="bi bi-hash"></i> Número</th>
+                <th><i class="bi bi-file-text"></i> Objeto</th>
+                <th><i class="bi bi-tag"></i> Modalidade</th>
+                <th><i class="bi bi-building"></i> Secretaria</th>
+                <th><i class="bi bi-person"></i> Pregoeiro</th>
+                <th><i class="bi bi-people"></i> Equipe</th>
+                <th><i class="bi bi-clipboard-check"></i> Fase</th>
+                <th><i class="bi bi-calendar"></i> Abertura</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaLicitacoes">
+            </tbody>
+          </table>
+        </div>
+        
+        <div id="empty-state" class="empty-state" style="display: none;">
+          <i class="bi bi-inbox"></i>
+          <h5>Nenhuma licitação encontrada</h5>
+          <p>Não foram encontradas licitações com os filtros aplicados.</p>
+          <button class="btn btn-primary" onclick="limparFiltros()">
+            <i class="bi bi-arrow-clockwise"></i> Limpar Filtros
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <a href="https://wa.me/5565999530883?text=Olá! Gostaria de mais informações sobre as licitações de Mirassol d'Oeste." 
+     target="_blank" class="btn-whatsapp d-flex align-items-center">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.16 11.89c-.001 2.096.547 4.142 1.588 5.945L0 24l6.335-1.652a11.808 11.808 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.951 3.66"/>
+    </svg>
+    <span>Contato</span>
+  </a>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    const SUPABASE_URL = 'https://wrayfqfxrxizltezkjrr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyYXlmcWZ4cnhpemx0ZXpranJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3ODA2ODksImV4cCI6MjA2ODM1NjY4OX0.OP6XzwZ840PVj_0Oah0sSOfalWk5SH7xBDcQPVtaT8s';
+    
+    let supabase;
+    let licitacoes = [];
+    let licitacoesFiltradas = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      configurarEventos();
+      carregarDados();
+      atualizarTimestamp();
+      setInterval(carregarDados, 5 * 60 * 1000);
+    });
+
+    async function carregarDados() {
+      try {
+        mostrarLoading(true);
+        const { data, error } = await supabase
+          .from('v_licitacoes_completas')
+          .select('*')
+          .eq('publicada', true)
+          .eq('status', 'ativa')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Erro ao carregar licitações:', error);
+          mostrarMensagem('Erro ao carregar dados. Tentando novamente...', 'warning');
+          return;
+        }
+
+        licitacoes = data || [];
+        licitacoesFiltradas = licitacoes;
+        
+        atualizarEstatisticas();
+        carregarFiltros();
+        renderizarTabela();
+        
+      } catch (error) {
+        console.error('Erro geral:', error);
+        mostrarMensagem('Erro de conexão. Verifique sua internet.', 'danger');
+      } finally {
+        mostrarLoading(false);
+      }
+    }
+
+    function atualizarEstatisticas() {
+      const total = licitacoes.length;
+      const emAndamento = licitacoes.filter(l => 
+        l.fase_nome === 'Em Andamento'
+      ).length;
+      const publicadas = licitacoes.filter(l => l.fase_nome === 'Publicada').length;
+      const modalidades = new Set(licitacoes.map(l => l.modalidade_nome).filter(m => m));
+      
+      animarNumero('total-licitacoes', total);
+      animarNumero('em-andamento', emAndamento);
+      animarNumero('publicadas-hoje', publicadas);
+      animarNumero('modalidades-ativas', modalidades.size);
+    }
+
+    function animarNumero(elementId, valorFinal) {
+      const elemento = document.getElementById(elementId);
+      const valorAtual = parseInt(elemento.textContent) || 0;
+      if (valorAtual === valorFinal) return;
+      const duracao = 1000;
+      const passo = (valorFinal - valorAtual) / (duracao / 20);
+      
+      let contador = valorAtual;
+      const intervalo = setInterval(() => {
+        contador += passo;
+        if ((passo > 0 && contador >= valorFinal) || (passo < 0 && contador <= valorFinal)) {
+          elemento.textContent = valorFinal;
+          clearInterval(intervalo);
+        } else {
+          elemento.textContent = Math.ceil(contador);
+        }
+      }, 20);
+    }
+
+    function carregarFiltros() {
+      const modalidades = [...new Set(licitacoes.map(l => l.modalidade_nome).filter(m => m))];
+      const selectModalidade = document.getElementById('filtroModalidade');
+      selectModalidade.innerHTML = '<option value="">Todas</option>';
+      modalidades.forEach(modalidade => {
+        selectModalidade.innerHTML += `<option value="${modalidade}">${modalidade}</option>`;
+      });
+
+      const secretarias = [...new Set(licitacoes.map(l => l.secretaria_nome).filter(s => s))];
+      const selectSecretaria = document.getElementById('filtroSecretaria');
+      selectSecretaria.innerHTML = '<option value="">Todas</option>';
+      secretarias.forEach(secretaria => {
+        selectSecretaria.innerHTML += `<option value="${secretaria}">${secretaria}</option>`;
+      });
+
+      const fases = [...new Set(licitacoes.map(l => l.fase_nome).filter(f => f))];
+      const selectFase = document.getElementById('filtroFase');
+      selectFase.innerHTML = '<option value="">Todas</option>';
+      fases.forEach(fase => {
+        selectFase.innerHTML += `<option value="${fase}">${fase}</option>`;
+      });
+    }
+
+    function aplicarFiltros() {
+      const busca = document.getElementById('busca').value.toLowerCase();
+      const modalidade = document.getElementById('filtroModalidade').value;
+      const secretaria = document.getElementById('filtroSecretaria').value;
+      const fase = document.getElementById('filtroFase').value;
+
+      licitacoesFiltradas = licitacoes.filter(licitacao => {
+        const matchBusca = !busca || 
+          licitacao.numero.toLowerCase().includes(busca) ||
+          licitacao.objeto.toLowerCase().includes(busca);
+        
+        const matchModalidade = !modalidade || licitacao.modalidade_nome === modalidade;
+        const matchSecretaria = !secretaria || licitacao.secretaria_nome === secretaria;
+        const matchFase = !fase || licitacao.fase_nome === fase;
+
+        return matchBusca && matchModalidade && matchSecretaria && matchFase;
+      });
+
+      renderizarTabela();
+    }
+
+    function limparFiltros() {
+      document.getElementById('busca').value = '';
+      document.getElementById('filtroModalidade').value = '';
+      document.getElementById('filtroSecretaria').value = '';
+      document.getElementById('filtroFase').value = '';
+      
+      licitacoesFiltradas = licitacoes;
+      renderizarTabela();
+    }
+
+    function renderizarTabela() {
+      const tbody = document.getElementById('tabelaLicitacoes');
+      const emptyState = document.getElementById('empty-state');
+      
+      if (licitacoesFiltradas.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      
+      tbody.innerHTML = licitacoesFiltradas.map((licitacao, index) => {
+        const dataAbertura = formatarData(licitacao.abertura);
+        const equipeTexto = obterEquipeTexto(licitacao);
+        
+        return `
+          <tr class="fade-in" style="animation-delay: ${index * 0.05}s">
+            <td>
+              <strong class="text-primary">${licitacao.numero || 'N/A'}</strong>
+              <br>
+              <small class="text-muted">${licitacao.ano || new Date().getFullYear()}</small>
+            </td>
+            <td>
+              <div class="text-truncate" style="max-width: 300px;" title="${licitacao.objeto}">
+                ${licitacao.objeto || 'Objeto não informado'}
+              </div>
+              ${licitacao.valor_estimado ? `<small class="text-success"><i class="bi bi-currency-dollar"></i> R$ ${formatarMoeda(licitacao.valor_estimado)}</small>` : ''}
+            </td>
+            <td>
+              <span class="badge modalidade">${licitacao.modalidade_nome || 'N/A'}</span>
+            </td>
+            <td>
+              <strong>${licitacao.secretaria_sigla || 'N/A'}</strong>
+              <br>
+              <small class="text-muted">${licitacao.secretaria_nome || ''}</small>
+            </td>
+            <td>
+              ${licitacao.pregoeiro_nome || 'N/A'}
+            </td>
+            <td>
+              ${equipeTexto}
+            </td>
+            <td>
+              <span class="badge fase" style="background-color: ${licitacao.fase_cor || '#6c757d'}">
+                ${licitacao.fase_nome || 'N/A'}
+              </span>
+            </td>
+            <td>
+              <strong>${dataAbertura}</strong>
+              ${licitacao.sessao_publica ? `<br><small class="text-muted">Sessão: ${formatarDataHora(licitacao.sessao_publica)}</small>` : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function obterEquipeTexto(licitacao) {
+      if (licitacao.equipe_nomes) {
+        const equipe = licitacao.equipe_nomes.split(',').slice(0, 2);
+        let texto = equipe.join('<br>');
+        if (licitacao.equipe_nomes.split(',').length > 2) {
+          texto += `<br><small class="text-muted">+${licitacao.equipe_nomes.split(',').length - 2} mais</small>`;
+        }
+        return texto || 'N/A';
+      }
+      return 'N/A';
+    }
+
+    function formatarData(data) {
+      if (!data) return 'N/A';
+      const d = new Date(data);
+      return new Date(d.valueOf() + d.getTimezoneOffset() * 60000).toLocaleDateString('pt-BR');
+    }
+
+    function formatarDataHora(data) {
+      if (!data) return 'N/A';
+      return new Date(data).toLocaleString('pt-BR');
+    }
+
+    function formatarMoeda(valor) {
+      if (!valor) return '0,00';
+      return parseFloat(valor).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function mostrarLoading(mostrar) {
+      document.getElementById('loading-overlay').style.display = mostrar ? 'flex' : 'none';
+    }
+
+    function mostrarMensagem(texto, tipo = 'info') {
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+      alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+      alert.innerHTML = `${texto}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+      document.body.appendChild(alert);
+      setTimeout(() => { if (alert.parentNode) { alert.remove(); } }, 5000);
+    }
+
+    function atualizarTimestamp() {
+      document.getElementById('ultima-atualizacao').textContent = new Date().toLocaleString('pt-BR');
+    }
+
+    function configurarEventos() {
+      document.getElementById('busca').addEventListener('input', aplicarFiltros);
+      document.getElementById('filtroModalidade').addEventListener('change', aplicarFiltros);
+      document.getElementById('filtroSecretaria').addEventListener('change', aplicarFiltros);
+      document.getElementById('filtroFase').addEventListener('change', aplicarFiltros);
+      
+      document.getElementById('btnAumentarFonte').addEventListener('click', aumentarFonte);
+      document.getElementById('btnDiminuirFonte').addEventListener('click', diminuirFonte);
+      document.getElementById('btnContraste').addEventListener('click', alternarContraste);
+
+      document.getElementById('card-total').addEventListener('click', limparFiltros);
+      document.getElementById('card-em-andamento').addEventListener('click', () => filtrarPorFase('Em Andamento'));
+      document.getElementById('card-publicadas').addEventListener('click', () => filtrarPorFase('Publicada'));
+    }
+    
+    function filtrarPorFase(nomeFase) {
+        document.getElementById('busca').value = '';
+        document.getElementById('filtroModalidade').value = '';
+        document.getElementById('filtroSecretaria').value = '';
+
+        const selectFase = document.getElementById('filtroFase');
+        selectFase.value = nomeFase;
+        
+        aplicarFiltros();
+    }
+
+    let tamanhoFonte = 16;
+    function aumentarFonte() {
+      if (tamanhoFonte < 24) {
+        tamanhoFonte += 2;
+        document.body.style.fontSize = tamanhoFonte + 'px';
+      }
+    }
+
+    function diminuirFonte() {
+      if (tamanhoFonte > 12) {
+        tamanhoFonte -= 2;
+        document.body.style.fontSize = tamanhoFonte + 'px';
+      }
+    }
+
+    function alternarContraste() {
+      document.body.classList.toggle('alto-contraste');
+      localStorage.setItem('alto-contraste', document.body.classList.contains('alto-contraste'));
+    }
+
+    function exportarExcel() {
+      if (licitacoesFiltradas.length === 0) {
+        mostrarMensagem('Nenhuma licitação para exportar.', 'warning');
+        return;
+      }
+
+      const headers = ['Número', 'Objeto', 'Modalidade', 'Secretaria', 'Pregoeiro', 'Fase', 'Data Abertura'];
+      const dados = licitacoesFiltradas.map(l => [
+        l.numero || '',
+        l.objeto || '',
+        l.modalidade_nome || '',
+        l.secretaria_nome || '',
+        l.pregoeiro_nome || '',
+        l.fase_nome || '',
+        formatarData(l.abertura)
+      ]);
+
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + [headers.join(';'), ...dados.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';'))].join('\n');
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `licitacoes_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      mostrarMensagem('Arquivo CSV exportado com sucesso!', 'success');
+    }
+
+    if (localStorage.getItem('alto-contraste') === 'true') {
+      document.body.classList.add('alto-contraste');
+    }
+  </script>
+</body>
+</html>
