@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Sistema de Licitações</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --secondary-color: #6c757d;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; }
+
+    body {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #0b5ed7 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+      max-width: 450px;
+      width: 100%;
+      position: relative;
+      z-index: 10;
+      animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #0b5ed7 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    .logo-container {
+      width: 80px;
+      height: 80px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    .login-header h2 { margin-bottom: 8px; font-size: 1.5rem; font-weight: 700; }
+    .login-header p { margin-bottom: 0; opacity: 0.9; font-size: 0.95rem; }
+    .login-form { padding: 40px 30px; }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; margin-bottom: 8px; color: #495057; font-weight: 600; }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+      background: white;
+    }
+
+    .form-check { margin-bottom: 20px; }
+    .form-check-input { margin-right: 8px; }
+
+    .btn-login {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary-color) 0%, #0b5ed7 100%);
+      border: none;
+      border-radius: 8px;
+      padding: 12px 30px;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+    }
+    
+    .btn-login:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .alert { padding: 12px 16px; border-radius: 8px; border: none; margin-bottom: 20px; }
+    .alert-success { background-color: #d1e7dd; color: #0f5132; }
+    .alert-danger { background-color: #f8d7da; color: #842029; }
+    .alert-warning { background-color: #fff3cd; color: #664d03; }
+    .text-center { text-align: center; }
+    .text-decoration-none { text-decoration: none; }
+    .text-muted { color: #6c757d; }
+
+    .security-info {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      border-left: 4px solid var(--primary-color);
+    }
+    .security-info h6 { margin-bottom: 8px; color: var(--primary-color); }
+    .security-info small { color: #6c757d; line-height: 1.4; }
+
+    .footer-links {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+    }
+    .footer-links a { color: var(--secondary-color); text-decoration: none; margin: 0 15px; font-size: 14px; transition: color 0.3s ease; }
+    .footer-links a:hover { color: var(--primary-color); }
+
+    @media (max-width: 576px) {
+      body { padding: 10px; }
+      .login-container { max-width: 100%; }
+      .login-header, .login-form { padding: 30px 20px; }
+      .logo-container { width: 60px; height: 60px; font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <div class="logo-container"> <i class="bi bi-gear-fill"></i> </div>
+      <h2>Painel Administrativo</h2>
+      <p>Sistema de Licitações - Mirassol d'Oeste</p>
+    </div>
+    
+    <div class="login-form">
+      <div id="alert-container"></div>
+      
+      <form id="login-form" onsubmit="realizarLogin(event)">
+        <div class="form-group">
+          <label for="email" class="form-label"><i class="bi bi-envelope me-2"></i>E-mail</label>
+          <input type="email" class="form-control" id="email" name="email" placeholder="Digite seu e-mail" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="senha" class="form-label"><i class="bi bi-lock me-2"></i>Senha</label>
+          <input type="password" class="form-control" id="senha" name="senha" placeholder="Digite sua senha" required>
+        </div>
+        
+        <button type="submit" class="btn btn-login" id="btn-entrar">
+          <div class="loading-spinner"></div>
+          <span class="btn-text">
+            <i class="bi bi-box-arrow-in-right me-2"></i>
+            Entrar no Sistema
+          </span>
+        </button>
+        
+        <div class="text-center">
+          <a href="#" onclick="esqueceuSenha()" class="text-decoration-none">
+            <i class="bi bi-question-circle me-1"></i>
+            Esqueceu sua senha?
+          </a>
+        </div>
+      </form>
+      
+      <div class="security-info">
+        <h6><i class="bi bi-shield-check me-2"></i>Área Restrita</h6>
+        <small>Acesso exclusivo para servidores autorizados. Todas as ações são registradas.</small>
+      </div>
+      
+      <div class="footer-links">
+        <a href="index.html"><i class="bi bi-eye me-1"></i>Site Público</a>
+        <a href="#" onclick="suporteTecnico()"><i class="bi bi-headset me-1"></i>Suporte</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://wrayfqfxrxizltezkjrr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyYXlmcWZ4cnhpemx0ZXpranJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3ODA2ODksImV4cCI6MjA2ODM1NjY4OX0.OP6XzwZ840PVj_0Oah0sSOfalWk5SH7xBDcQPVtaT8s';
+    let supabase;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      verificarSessao();
+      document.getElementById('email').focus();
+    });
+
+    async function verificarSessao() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        window.location.href = 'admin.html';
+      }
+    }
+
+    async function realizarLogin(event) {
+      event.preventDefault();
+      
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value;
+      
+      if (!email || !senha) {
+        mostrarAlerta('Por favor, preencha todos os campos.', 'warning');
+        return;
+      }
+      
+      mostrarLoading(true);
+      limparAlertas();
+      
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: senha,
+        });
+
+        if (error) {
+          if (error.message.includes('Invalid login credentials')) {
+            mostrarAlerta('E-mail ou senha incorretos.', 'danger');
+          } else {
+            mostrarAlerta(`Erro de autenticação: ${error.message}`, 'danger');
+          }
+          return;
+        }
+
+        mostrarAlerta('Login realizado com sucesso! Redirecionando...', 'success');
+        setTimeout(() => { window.location.href = 'admin.html'; }, 1500);
+
+      } catch (error) {
+        console.error('Erro no login:', error);
+        mostrarAlerta('Ocorreu um erro inesperado. Tente novamente.', 'danger');
+      } finally {
+        mostrarLoading(false);
+      }
+    }
+
+    function mostrarLoading(mostrar) {
+      const spinner = document.querySelector('.loading-spinner');
+      const btnText = document.querySelector('.btn-text');
+      const btn = document.getElementById('btn-entrar');
+      
+      spinner.style.display = mostrar ? 'inline-block' : 'none';
+      btnText.style.opacity = mostrar ? '0.7' : '1';
+      btn.disabled = mostrar;
+    }
+
+    function mostrarAlerta(mensagem, tipo) {
+      const container = document.getElementById('alert-container');
+      const iconMap = { 'success': 'check-circle', 'danger': 'exclamation-triangle', 'warning': 'exclamation-triangle' };
+      container.innerHTML = `<div class="alert alert-${tipo}" role="alert"><i class="bi bi-${iconMap[tipo]} me-2"></i>${mensagem}</div>`;
+      setTimeout(() => { container.innerHTML = '' }, 5000);
+    }
+
+    function limparAlertas() {
+      document.getElementById('alert-container').innerHTML = '';
+    }
+
+    function esqueceuSenha() {
+      mostrarAlerta('Para recuperar sua senha, entre em contato com o suporte técnico.', 'info');
+    }
+
+    function suporteTecnico() {
+      const mensagem = `Olá! Preciso de suporte técnico para o Sistema de Licitações. Usuário: ${document.getElementById('email').value || 'Não informado'}`;
+      window.open(`https://wa.me/5565999530883?text=${encodeURIComponent(mensagem)}`, '_blank');
+    }
+  </script>
+</body>
+</html>
