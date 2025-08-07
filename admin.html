@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo - Licitações Mirassol d'Oeste</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* Todo o CSS integrado aqui */
+    :root {
+      --primary-color: #0d6efd;
+      --secondary-color: #6c757d;
+      --sidebar-width: 280px;
+    }
+
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .sidebar {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--primary-color) 0%, #0b5ed7 100%);
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      z-index: 1020;
+      transition: margin-left 0.3s ease-in-out;
+    }
+
+    .sidebar .nav-link {
+      color: rgba(255, 255, 255, 0.8);
+      padding: 12px 20px;
+      margin: 2px 10px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar .nav-link:hover, .sidebar .nav-link.active {
+      color: white;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 20px;
+      transition: margin-left 0.3s ease-in-out;
+    }
+    
+    .header {
+      background: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+
+    .sidebar-toggle {
+      font-size: 1.5rem;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1010;
+    }
+
+    .sidebar-overlay.is-active {
+      display: block;
+    }
+
+    @media (max-width: 992px) {
+      .sidebar {
+        margin-left: calc(-1 * var(--sidebar-width));
+      }
+      .sidebar.is-open {
+        margin-left: 0;
+      }
+      .main-content {
+        margin-left: 0;
+      }
+    }
+
+    .card { border: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .stat-card { border-left: 4px solid var(--primary-color); }
+    .form-section { background: white; padding: 25px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .section-title { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; margin-bottom: 20px; }
+    
+    .loading { text-align: center; padding: 20px; }
+    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="sidebar-overlay"></div>
+  <nav class="sidebar">
+    <div class="p-3">
+      <div class="d-flex align-items-center mb-4">
+        <img src="logo-mirassol.png" alt="Logo" style="width: 50px; height: 50px;" class="me-3">
+        <div>
+          <h6 class="mb-0">Painel Admin</h6>
+          <small class="text-white-50">Licitações</small>
+        </div>
+      </div>
+      
+      <ul class="nav nav-pills flex-column">
+        <li class="nav-item"><a class="nav-link active" href="#" onclick="mostrarSecao('dashboard')"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="mostrarSecao('licitacoes')"><i class="bi bi-file-text me-2"></i>Licitações</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="mostrarSecao('nova-licitacao')"><i class="bi bi-plus-circle me-2"></i>Nova Licitação</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="mostrarSecao('secretarias')"><i class="bi bi-building me-2"></i>Secretarias</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="mostrarSecao('pregoeiros')"><i class="bi bi-people me-2"></i>Pregoeiros</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="mostrarSecao('modalidades')"><i class="bi bi-tags me-2"></i>Modalidades</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="mostrarSecao('fases')"><i class="bi bi-diagram-3 me-2"></i>Fases do Processo</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="mostrarSecao('equipe-apoio')"><i class="bi bi-people-fill me-2"></i>Equipe de Apoio</a></li>
+        <li class="nav-item mt-3"><a class="nav-link text-warning" href="index.html" target="_blank"><i class="bi bi-eye me-2"></i>Ver Site Público</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="header d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center">
+        <button class="btn d-lg-none me-3 sidebar-toggle" type="button">
+          <i class="bi bi-list"></i>
+        </button>
+        <div>
+          <h4 class="mb-0" id="page-title">Dashboard</h4>
+          <small class="text-muted">Sistema de Licitações - Mirassol d'Oeste</small>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <span class="user-info me-3 d-none d-md-inline"></span>
+        <button class="btn btn-outline-secondary" onclick="logout()"><i class="bi bi-box-arrow-right"></i> <span class="d-none d-md-inline">Sair</span></button>
+      </div>
+    </div>
+
+    <section id="dashboard" class="content-section">
+      <div class="row mb-4">
+        <div class="col-md-3 mb-3"><div class="card stat-card"><div class="card-body"><div class="d-flex justify-content-between"><div><h3 class="mb-0" id="total-licitacoes">0</h3><p class="text-muted mb-0">Total de Licitações</p></div><div class="text-primary"><i class="bi bi-file-text" style="font-size: 2rem;"></i></div></div></div></div></div>
+        <div class="col-md-3 mb-3"><div class="card stat-card" style="border-left-color: #28a745;"><div class="card-body"><div class="d-flex justify-content-between"><div><h3 class="mb-0" id="em-andamento">0</h3><p class="text-muted mb-0">Em Andamento</p></div><div class="text-success"><i class="bi bi-clock" style="font-size: 2rem;"></i></div></div></div></div></div>
+        <div class="col-md-3 mb-3"><div class="card stat-card" style="border-left-color: #ffc107;"><div class="card-body"><div class="d-flex justify-content-between"><div><h3 class="mb-0" id="publicadas">0</h3><p class="text-muted mb-0">Publicadas</p></div><div class="text-warning"><i class="bi bi-megaphone" style="font-size: 2rem;"></i></div></div></div></div></div>
+        <div class="col-md-3 mb-3"><div class="card stat-card" style="border-left-color: #dc3545;"><div class="card-body"><div class="d-flex justify-content-between"><div><h3 class="mb-0" id="finalizadas">0</h3><p class="text-muted mb-0">Finalizadas</p></div><div class="text-danger"><i class="bi bi-check-circle" style="font-size: 2rem;"></i></div></div></div></div></div>
+      </div>
+      
+      <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+          <div class="card h-100">
+            <div class="card-header"><h5 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Processos por Modalidade</h5></div>
+            <div class="card-body">
+              <canvas id="chartModalidades"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+          <div class="card h-100">
+            <div class="card-header"><h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Status dos Processos</h5></div>
+            <div class="card-body d-flex justify-content-center align-items-center">
+              <div style="max-width: 350px; width: 100%;">
+                <canvas id="chartStatusProcessos"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+          <div class="col-lg-6 mb-4">
+              <div class="card h-100">
+                <div class="card-header"><h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Licitações por Mês</h5></div>
+                <div class="card-body">
+                  <canvas id="chartLicitacoesPorMes"></canvas>
+                </div>
+              </div>
+            </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+              <div class="card-header"><h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Processos por Pregoeiro</h5></div>
+              <div class="card-body">
+                <canvas id="chartPregoeiros"></canvas>
+              </div>
+            </div>
+          </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center"><h5 class="mb-0">Licitações Recentes</h5><button class="btn btn-sm btn-primary" onclick="mostrarSecao('nova-licitacao')"><i class="bi bi-plus"></i> Nova Licitação</button></div>
+        <div class="card-body">
+          <div id="loading-dashboard" class="loading"><div class="spinner"></div><p>Carregando dados...</p></div>
+          <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Número</th><th>Objeto</th><th>Fase</th><th>Abertura</th><th>Ações</th></tr></thead><tbody id="tabela-licitacoes-recentes"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="licitacoes" class="content-section" style="display: none;">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center"><h5 class="mb-0">Gerenciar Licitações</h5><button class="btn btn-sm btn-primary" onclick="mostrarSecao('nova-licitacao')"><i class="bi bi-plus"></i> Nova Licitação</button></div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-3"><input type="text" class="form-control" id="filtro-numero" placeholder="Filtrar por número/objeto..."></div>
+            <div class="col-md-3"><select class="form-select" id="filtro-modalidade-admin"><option value="">Todas as modalidades</option></select></div>
+            <div class="col-md-3"><select class="form-select" id="filtro-secretaria-admin"><option value="">Todas as secretarias</option></select></div>
+            <div class="col-md-3"><select class="form-select" id="filtro-fase-admin"><option value="">Todas as fases</option></select></div>
+          </div>
+          <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Número</th><th>Objeto</th><th>Modalidade</th><th>Fase</th><th>Status</th><th>Abertura</th><th>Ações</th></tr></thead><tbody id="tabela-licitacoes-todas"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="nova-licitacao" class="content-section" style="display: none;">
+      <form id="form-licitacao" onsubmit="salvarLicitacao(event)">
+        <input type="hidden" name="id" id="licitacao-id">
+        <div class="form-section"><h5 class="section-title">Informações Básicas</h5>
+          <div class="row">
+            <div class="col-md-3"><label class="form-label">Número *</label><input type="text" class="form-control" name="numero" required></div>
+            <div class="col-md-3"><label class="form-label">Ano *</label><input type="number" class="form-control" name="ano" value="2025" required></div>
+            <div class="col-md-3"><label class="form-label">Modalidade *</label><select class="form-select" name="modalidade_id" required><option value="">Selecione...</option></select></div>
+            <div class="col-md-3"><label class="form-label">Secretaria *</label><select class="form-select" name="secretaria_id" required><option value="">Selecione...</option></select></div>
+          </div>
+          <div class="mt-3"><label class="form-label">Objeto *</label><textarea class="form-control" name="objeto" rows="2" required></textarea></div>
+        </div>
+        <div class="form-section"><h5 class="section-title">Responsáveis e Equipe</h5>
+          <div class="row">
+            <div class="col-md-6"><label class="form-label">Pregoeiro *</label><select class="form-select" name="pregoeiro_id" required><option value="">Selecione...</option></select></div>
+            <div class="col-md-6"><label class="form-label">Fase Inicial *</label><select class="form-select" name="fase_atual_id" required><option value="">Selecione...</option></select></div>
+          </div>
+          <div class="mt-3"><label class="form-label">Equipe de Apoio</label><div id="equipe-apoio-licitacao-container"></div><button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="adicionarEquipeLicitacao()"><i class="bi bi-plus"></i> Adicionar Membro</button></div>
+        </div>
+        <div class="form-section"><h5 class="section-title">Datas e Prazos</h5>
+          <div class="row">
+            <div class="col-md-3"><label class="form-label">Data de Abertura</label><input type="date" class="form-control" name="abertura"></div>
+            <div class="col-md-3"><label class="form-label">Encerramento Propostas</label><input type="datetime-local" class="form-control" name="encerramento_proposta"></div>
+            <div class="col-md-3"><label class="form-label">Sessão Pública</label><input type="datetime-local" class="form-control" name="sessao_publica"></div>
+            <div class="col-md-3"><label class="form-label">Prazo de Impugnação</label><input type="date" class="form-control" name="prazo_impugnacao"></div>
+          </div>
+        </div>
+        <div class="form-section"><h5 class="section-title">Valores e Condições</h5>
+            <div class="row">
+                <div class="col-md-4"><label class="form-label">Valor Estimado (R$)</label><input type="number" step="0.01" class="form-control" name="valor_estimado"></div>
+                <div class="col-md-4"><label class="form-label">Critério de Julgamento</label><select class="form-select" name="criterio_julgamento" id="criterio-julgamento-select"><option value="">Selecione a modalidade primeiro</option></select></div>
+                <div class="col-md-4"><label class="form-label">Prazo de Entrega</label><input type="text" class="form-control" name="prazo_entrega" placeholder="Ex: 30 dias úteis"></div>
+            </div>
+            <div class="mt-3"><label class="form-label">Link do Edital (URL)</label><input type="url" class="form-control" name="link_edital" placeholder="https://..."></div>
+        </div>
+        <div class="form-section"><h5 class="section-title">Publicação e Status</h5>
+          <div class="row align-items-center">
+            <div class="col-md-6"><div class="form-check form-switch fs-5"><input class="form-check-input" type="checkbox" role="switch" name="publicada" id="publicada"><label class="form-check-label" for="publicada">Publicar no site público</label></div></div>
+            <div class="col-md-6"><label class="form-label">Status do Processo</label><select class="form-select" name="status"><option value="ativa">Ativa</option><option value="suspensa">Suspensa</option><option value="cancelada">Cancelada</option><option value="finalizada">Finalizada</option></select></div>
+          </div>
+        </div>
+        <div class="text-end"><button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save"></i> Salvar Licitação</button> <button type="button" class="btn btn-outline-secondary btn-lg" onclick="limparFormulario()">Limpar Tudo</button></div>
+      </form>
+    </section>
+
+    <section id="secretarias" class="content-section" style="display: none;">
+      <div class="row">
+        <div class="col-lg-5 mb-4">
+          <div class="card h-100"><div class="card-header"><h5 class="mb-0">Nova/Editar Secretaria</h5></div>
+            <div class="card-body"><form id="form-secretaria" onsubmit="salvarSecretaria(event)">
+              <input type="hidden" name="id" id="secretaria-id">
+              <div class="mb-3"><label class="form-label">Nome *</label><input type="text" class="form-control" name="nome" required></div>
+              <div class="mb-3"><label class="form-label">Sigla</label><input type="text" class="form-control" name="sigla"></div>
+              <div class="mb-3"><label class="form-label">Responsável</label><input type="text" class="form-control" name="responsavel"></div>
+              <div class="mb-3"><label class="form-label">Telefone</label><input type="text" class="form-control" name="telefone"></div>
+              <div class="mb-3"><label class="form-label">E-mail</label><input type="email" class="form-control" name="email"></div>
+              <div class="mb-3 form-check"><input class="form-check-input" type="checkbox" name="ativa" id="secretaria-ativa" checked><label class="form-check-label" for="secretaria-ativa">Ativa</label></div>
+              <button type="submit" class="btn btn-primary">Salvar</button> <button type="button" class="btn btn-outline-secondary" onclick="limparFormSecretaria()">Limpar</button>
+            </form></div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="card"><div class="card-header"><h5 class="mb-0">Lista de Secretarias</h5></div>
+            <div class="card-body"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Nome</th><th>Responsável</th><th>Contato</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tabela-secretarias"></tbody></table></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pregoeiros" class="content-section" style="display: none;">
+        <div class="row">
+            <div class="col-lg-5 mb-4">
+                <div class="card h-100"><div class="card-header"><h5 class="mb-0">Novo/Editar Pregoeiro</h5></div>
+                    <div class="card-body"><form id="form-pregoeiro" onsubmit="salvarPregoeiro(event)">
+                        <input type="hidden" name="id" id="pregoeiro-id">
+                        <div class="mb-3"><label class="form-label">Nome *</label><input type="text" class="form-control" name="nome" required></div>
+                        <div class="mb-3"><label class="form-label">Matrícula</label><input type="text" class="form-control" name="matricula"></div>
+                        <div class="mb-3"><label class="form-label">CPF</label><input type="text" class="form-control" name="cpf"></div>
+                        <div class="mb-3"><label class="form-label">Telefone</label><input type="text" class="form-control" name="telefone"></div>
+                        <div class="mb-3"><label class="form-label">E-mail</label><input type="email" class="form-control" name="email"></div>
+                        <div class="mb-3"><label class="form-label">Secretaria</label><select class="form-select" name="secretaria_id"><option value="">Nenhuma</option></select></div>
+                        <div class="mb-3 form-check"><input class="form-check-input" type="checkbox" name="ativo" id="pregoeiro-ativo" checked><label class="form-check-label" for="pregoeiro-ativo">Ativo</label></div>
+                        <button type="submit" class="btn btn-primary">Salvar</button> <button type="button" class="btn btn-outline-secondary" onclick="limparFormPregoeiro()">Limpar</button>
+                    </form></div>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="card"><div class="card-header"><h5 class="mb-0">Lista de Pregoeiros</h5></div>
+                    <div class="card-body"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Nome</th><th>Matrícula</th><th>Secretaria</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tabela-pregoeiros"></tbody></table></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="modalidades" class="content-section" style="display: none;">
+      <div class="row">
+        <div class="col-md-5">
+            <div class="card"><div class="card-header"><h5 class="mb-0">Nova/Editar Modalidade</h5></div>
+                <div class="card-body"><form id="form-modalidade" onsubmit="salvarModalidade(event)">
+                    <input type="hidden" name="id" id="modalidade-id">
+                    <div class="mb-3"><label class="form-label">Nome *</label><input type="text" class="form-control" name="nome" required></div>
+                    <div class="mb-3"><label class="form-label">Critérios de Julgamento</label><div id="criterios-container"></div><button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="adicionarCriterio()"><i class="bi bi-plus"></i> Adicionar Critério</button></div>
+                    <div class="mb-3 form-check"><input class="form-check-input" type="checkbox" name="ativa" id="modalidade-ativa" checked><label class="form-check-label" for="modalidade-ativa">Ativa</label></div>
+                    <button type="submit" class="btn btn-primary">Salvar</button> <button type="button" class="btn btn-outline-secondary" onclick="limparFormModalidade()">Limpar</button>
+                </form></div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="card"><div class="card-header"><h5 class="mb-0">Lista de Modalidades</h5></div>
+                <div class="card-body"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Nome</th><th>Critérios</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tabela-modalidades"></tbody></table></div></div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="fases" class="content-section" style="display: none;">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card"><div class="card-header"><h5 class="mb-0">Nova/Editar Fase</h5></div>
+            <div class="card-body"><form id="form-fase" onsubmit="salvarFase(event)">
+              <input type="hidden" name="id" id="fase-id">
+              <div class="mb-3"><label class="form-label">Nome *</label><input type="text" class="form-control" name="nome" required></div>
+              <div class="mb-3"><label class="form-label">Cor do Badge</label><input type="color" class="form-control form-control-color" name="cor" value="#6c757d" title="Escolha uma cor"></div>
+              <div class="mb-3"><label class="form-label">Ordem</label><input type="number" class="form-control" name="ordem" value="0"></div>
+              <div class="mb-3 form-check"><input class="form-check-input" type="checkbox" name="ativa" id="fase-ativa" checked><label class="form-check-label" for="fase-ativa">Ativa</label></div>
+              <button type="submit" class="btn btn-primary">Salvar</button> <button type="button" class="btn btn-outline-secondary" onclick="limparFormFase()">Limpar</button>
+            </form></div>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="card"><div class="card-header"><h5 class="mb-0">Lista de Fases</h5></div>
+            <div class="card-body"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Ordem</th><th>Preview</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tabela-fases"></tbody></table></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="equipe-apoio" class="content-section" style="display: none;">
+      <div class="row">
+        <div class="col-lg-5 mb-4">
+            <div class="card h-100"><div class="card-header"><h5 class="mb-0">Novo/Editar Membro</h5></div>
+                <div class="card-body"><form id="form-equipe-apoio" onsubmit="salvarEquipeApoio(event)">
+                    <input type="hidden" name="id" id="equipe-id">
+                    <div class="mb-3"><label class="form-label">Nome *</label><input type="text" class="form-control" name="nome" required></div>
+                    <div class="mb-3"><label class="form-label">Função *</label><input type="text" class="form-control" name="funcao" required></div>
+                    <div class="mb-3"><label class="form-label">Matrícula</label><input type="text" class="form-control" name="matricula"></div>
+                    <div class="mb-3"><label class="form-label">CPF</label><input type="text" class="form-control" name="cpf"></div>
+                    <div class="mb-3"><label class="form-label">Telefone</label><input type="text" class="form-control" name="telefone"></div>
+                    <div class="mb-3"><label class="form-label">E-mail</label><input type="email" class="form-control" name="email"></div>
+                    <div class="mb-3"><label class="form-label">Especialidade</label><textarea name="especialidade" class="form-control" rows="2"></textarea></div>
+                    <div class="mb-3 form-check"><input class="form-check-input" type="checkbox" name="ativo" id="equipe-ativo" checked><label class="form-check-label" for="equipe-ativo">Ativo</label></div>
+                    <button type="submit" class="btn btn-primary">Salvar</button> <button type="button" class="btn btn-outline-secondary" onclick="limparFormEquipeApoio()">Limpar</button>
+                </form></div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card"><div class="card-header"><h5 class="mb-0">Lista da Equipe de Apoio</h5></div>
+                <div class="card-body"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Nome</th><th>Função</th><th>Contato</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tabela-equipe-apoio"></tbody></table></div></div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Todo o JavaScript integrado aqui
+    const SUPABASE_URL = 'https://wrayfqfxrxizltezkjrr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyYXlmcWZ4cnhpemx0ZXpranJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3ODA2ODksImV4cCI6MjA2ODM1NjY4OX0.OP6XzwZ840PVj_0Oah0sSOfalWk5SH7xBDcQPVtaT8s';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    let dadosCache = { licitacoes: [], secretarias: [], pregoeiros: [], modalidades: [], fases: [], equipeApoio: [] };
+    let chartModalidadesInstance, chartPregoeirosInstance, chartLicitacoesPorMesInstance, chartStatusProcessosInstance;
+    
+    document.addEventListener('DOMContentLoaded', async function() {
+        const autenticado = await verificarAutenticacao();
+        if (autenticado) {
+            await carregarDadosIniciais();
+            configurarEventListeners();
+            mostrarSecao('dashboard');
+        }
+    });
+
+    async function verificarAutenticacao() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            window.location.href = 'login.html';
+            return false;
+        }
+        document.querySelector('.user-info').textContent = session.user.email;
+        return true;
+    }
+
+    async function logout() {
+        if (confirm('Tem certeza que deseja sair?')) {
+            const { error } = await supabase.auth.signOut();
+            if (error) {
+                mostrarAlerta('Erro ao sair: ' + error.message, 'erro');
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+    }
+
+    function mostrarSecao(secaoId) {
+        document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+        document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+        
+        const secao = document.getElementById(secaoId);
+        if(secao) secao.style.display = 'block';
+        
+        const linkAtivo = [...document.querySelectorAll('.sidebar .nav-link')].find(l => l.getAttribute('onclick').includes(`'${secaoId}'`));
+        if(linkAtivo) linkAtivo.classList.add('active');
+        
+        const titulos = { 'dashboard': 'Dashboard', 'licitacoes': 'Gerenciar Licitações', 'nova-licitacao': 'Nova Licitação', 'secretarias': 'Secretarias', 'pregoeiros': 'Pregoeiros', 'modalidades': 'Modalidades', 'fases': 'Fases do Processo', 'equipe-apoio': 'Equipe de Apoio' };
+        document.getElementById('page-title').textContent = titulos[secaoId] || 'Painel';
+    }
+
+    function configurarEventListeners() {
+        document.getElementById('filtro-numero').addEventListener('input', filtrarLicitacoes);
+        document.getElementById('filtro-modalidade-admin').addEventListener('change', filtrarLicitacoes);
+        document.getElementById('filtro-secretaria-admin').addEventListener('change', filtrarLicitacoes);
+        document.getElementById('filtro-fase-admin').addEventListener('change', filtrarLicitacoes);
+        document.querySelector('select[name="modalidade_id"]').addEventListener('change', atualizarCriteriosJulgamento);
+        
+        const sidebarToggle = document.querySelector('.sidebar-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.querySelector('.sidebar-overlay');
+
+        if(sidebarToggle && sidebar && overlay) {
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('is-open');
+                overlay.classList.toggle('is-active');
+            });
+
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('is-open');
+                overlay.classList.remove('is-active');
+            });
+        }
+    }
+    
+    function mostrarAlerta(mensagem, tipo = 'sucesso') {
+        const cor = tipo === 'sucesso' ? '#198754' : '#dc3545';
+        const toast = document.createElement('div');
+        toast.className = `p-3 text-white`;
+        toast.style.cssText = `position:fixed; top:20px; right:20px; background-color:${cor}; border-radius:8px; z-index:9999; box-shadow:0 4px 8px rgba(0,0,0,0.2);`;
+        toast.textContent = mensagem;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    async function carregarDadosIniciais() {
+        const loadingDiv = document.getElementById('loading-dashboard');
+        if(loadingDiv) loadingDiv.style.display = 'block';
+        
+        try {
+            const [licitacoesRes, secretariasRes, pregoeirosRes, modalidadesRes, fasesRes, equipeApoioRes] = await Promise.all([
+                supabase.from('v_licitacoes_completas').select('*').order('created_at', { ascending: false }),
+                supabase.from('secretarias').select('*').order('nome'),
+                supabase.from('pregoeiros').select('*, secretarias(sigla)').order('nome'),
+                supabase.from('modalidades').select('*').order('nome'),
+                supabase.from('fases').select('*').order('ordem'),
+                supabase.from('equipe_apoio_geral').select('*').order('nome')
+            ]);
+            
+            dadosCache = {
+                licitacoes: licitacoesRes.data || [],
+                secretarias: secretariasRes.data || [],
+                pregoeiros: pregoeirosRes.data || [],
+                modalidades: modalidadesRes.data || [],
+                fases: fasesRes.data || [],
+                equipeApoio: equipeApoioRes.data || []
+            };
+            
+            preencherDropdowns();
+            carregarTabelas();
+            carregarDashboard();
+
+        } catch (error) {
+            mostrarAlerta('Erro ao carregar dados iniciais: ' + error.message, 'erro');
+            console.error("Erro ao carregar dados iniciais:", error);
+        } finally {
+            if(loadingDiv) loadingDiv.style.display = 'none';
+        }
+    }
+
+    function preencherDropdowns() {
+        const preencher = (seletor, dados, valor, texto) => {
+            document.querySelectorAll(seletor).forEach(select => {
+                if(!select) return;
+                const valorAtual = select.value;
+                const primeiraOpcaoTexto = select.querySelector('option:first-child') ? select.querySelector('option:first-child').innerText : 'Selecione...';
+                let options = `<option value="">${primeiraOpcaoTexto}</option>`;
+                dados.forEach(item => {
+                    if (item.ativa !== false || item.ativo !== false) {
+                        options += `<option value="${item[valor]}">${typeof texto === 'function' ? texto(item) : item[texto]}</option>`;
+                    }
+                });
+                select.innerHTML = options;
+                select.value = valorAtual;
+            });
+        };
+        preencher('select[name="modalidade_id"], #filtro-modalidade-admin', dadosCache.modalidades, 'id', 'nome');
+        preencher('select[name="secretaria_id"], #filtro-secretaria-admin, #form-pregoeiro select[name="secretaria_id"]', dadosCache.secretarias, 'id', 'nome');
+        preencher('select[name="pregoeiro_id"]', dadosCache.pregoeiros, 'id', 'nome');
+        preencher('select[name="fase_atual_id"], #filtro-fase-admin', dadosCache.fases, 'id', 'nome');
+        preencher('select[name="equipe_apoio_membro[]"]', dadosCache.equipeApoio, 'id', item => `${item.nome} (${item.funcao})`);
+    }
+
+    function atualizarCriteriosJulgamento() {
+        const modalidadeId = this.value;
+        const selectCriterios = document.getElementById('criterio-julgamento-select');
+        selectCriterios.innerHTML = '<option value="">Selecione...</option>';
+        if (modalidadeId) {
+            const modalidade = dadosCache.modalidades.find(m => m.id == modalidadeId);
+            if (modalidade && modalidade.criterios_julgamento) {
+                modalidade.criterios_julgamento.split(',').forEach(c => {
+                    const criterio = c.trim();
+                    if (criterio) selectCriterios.innerHTML += `<option value="${criterio}">${criterio}</option>`;
+                });
+            }
+        }
+    }
+
+    function carregarTabelas() {
+        filtrarLicitacoes(); // Carrega a tabela de licitações com filtros (ou sem, inicialmente)
+        carregarTabelaSecretarias();
+        carregarTabelaPregoeiros();
+        carregarTabelaModalidades();
+        carregarTabelaFases();
+        carregarTabelaEquipeApoio();
+    }
+
+    function carregarDashboard() {
+        const licitacoes = dadosCache.licitacoes;
+        document.getElementById('total-licitacoes').textContent = licitacoes.length;
+        document.getElementById('em-andamento').textContent = licitacoes.filter(l => l.status === 'ativa').length;
+        document.getElementById('publicadas').textContent = licitacoes.filter(l => l.publicada).length;
+        document.getElementById('finalizadas').textContent = licitacoes.filter(l => l.status === 'finalizada').length;
+        carregarTabelaRecentes();
+        criarChartModalidades();
+        criarChartPregoeiros();
+        criarChartLicitacoesPorMes();
+        criarChartStatusProcessos();
+    }
+    
+    function criarChartModalidades() {
+        const canvas = document.getElementById('chartModalidades');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const contagem = dadosCache.licitacoes.reduce((acc, {modalidade_nome}) => {
+            const nome = modalidade_nome || 'Não definida';
+            acc[nome] = (acc[nome] || 0) + 1;
+            return acc;
+        }, {});
+
+        if (chartModalidadesInstance) chartModalidadesInstance.destroy();
+        chartModalidadesInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(contagem),
+                datasets: [{
+                    label: '# de Processos',
+                    data: Object.values(contagem),
+                    backgroundColor: 'rgba(13, 110, 253, 0.7)',
+                    borderColor: 'rgba(13, 110, 253, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, stepSize: 1 } } }
+        });
+    }
+
+    function criarChartPregoeiros() {
+        const canvas = document.getElementById('chartPregoeiros');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const contagem = dadosCache.licitacoes.reduce((acc, {pregoeiro_nome}) => {
+            const nome = pregoeiro_nome || 'Não definido';
+            acc[nome] = (acc[nome] || 0) + 1;
+            return acc;
+        }, {});
+
+        if (chartPregoeirosInstance) chartPregoeirosInstance.destroy();
+        chartPregoeirosInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(contagem),
+                datasets: [{
+                    label: '# de Processos',
+                    data: Object.values(contagem),
+                    backgroundColor: 'rgba(25, 135, 84, 0.7)',
+                    borderColor: 'rgba(25, 135, 84, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+        });
+    }
+
+    function criarChartLicitacoesPorMes() {
+        const canvas = document.getElementById('chartLicitacoesPorMes');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const contagem = dadosCache.licitacoes.reduce((acc, { created_at }) => {
+            if(!created_at) return acc;
+            const data = new Date(created_at);
+            const mesAno = `${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+            acc[mesAno] = (acc[mesAno] || 0) + 1;
+            return acc;
+        }, {});
+
+        const labels = Object.keys(contagem).sort((a, b) => {
+            const [mesA, anoA] = a.split('/');
+            const [mesB, anoB] = b.split('/');
+            return new Date(anoA, mesA - 1) - new Date(anoB, mesB - 1);
+        });
+        const data = labels.map(label => contagem[label]);
+
+        if (chartLicitacoesPorMesInstance) chartLicitacoesPorMesInstance.destroy();
+        chartLicitacoesPorMesInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Licitações Criadas',
+                    data: data,
+                    fill: false,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    tension: 0.1
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function criarChartStatusProcessos() {
+        const canvas = document.getElementById('chartStatusProcessos');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const contagem = dadosCache.licitacoes.reduce((acc, { status }) => {
+            const nome = status || 'Não definido';
+            acc[nome] = (acc[nome] || 0) + 1;
+            return acc;
+        }, {});
+
+        if (chartStatusProcessosInstance) chartStatusProcessosInstance.destroy();
+        chartStatusProcessosInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(contagem),
+                datasets: [{
+                    data: Object.values(contagem),
+                    backgroundColor: [
+                        'rgba(13, 110, 253, 0.7)',
+                        'rgba(25, 135, 84, 0.7)',
+                        'rgba(255, 193, 7, 0.7)',
+                        'rgba(220, 53, 69, 0.7)',
+                        'rgba(108, 117, 125, 0.7)'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+    
+    function carregarTabelaRecentes() {
+        const tbody = document.getElementById('tabela-licitacoes-recentes');
+        tbody.innerHTML = dadosCache.licitacoes.slice(0, 5).map(l => `
+            <tr>
+                <td>${l.numero}</td>
+                <td title="${l.objeto}">${l.objeto.substring(0, 50)}...</td>
+                <td><span class="badge" style="background-color:${l.fase_cor || '#6c757d'}">${l.fase_nome || 'N/A'}</span></td>
+                <td>${l.abertura ? new Date(l.abertura).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : 'N/A'}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="editarLicitacao('${l.id}')"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="excluirLicitacao('${l.id}')"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>`).join('');
+    }
+    
+    function filtrarLicitacoes() {
+        const numero = document.getElementById('filtro-numero').value.toLowerCase();
+        const modalidade = document.getElementById('filtro-modalidade-admin').value;
+        const secretaria = document.getElementById('filtro-secretaria-admin').value;
+        const fase = document.getElementById('filtro-fase-admin').value;
+        const filtradas = dadosCache.licitacoes.filter(l => 
+            (l.numero.toLowerCase().includes(numero) || l.objeto.toLowerCase().includes(numero)) &&
+            (!modalidade || l.modalidade_id == modalidade) &&
+            (!secretaria || l.secretaria_id == secretaria) &&
+            (!fase || l.fase_atual_id == fase)
+        );
+        carregarTabelaTodasLicitacoes(filtradas);
+    }
+    
+    function carregarTabelaTodasLicitacoes(licitacoes) {
+        const tbody = document.getElementById('tabela-licitacoes-todas');
+        const dadosParaRenderizar = licitacoes || dadosCache.licitacoes;
+        tbody.innerHTML = dadosParaRenderizar.map(l => `
+            <tr>
+                <td>${l.numero}</td>
+                <td title="${l.objeto}">${l.objeto.substring(0, 40)}...</td>
+                <td>${l.modalidade_nome || 'N/A'}</td>
+                <td><span class="badge" style="background-color:${l.fase_cor || '#6c757d'}">${l.fase_nome}</span></td>
+                <td><span class="badge bg-${l.status === 'ativa' ? 'success' : 'secondary'}">${l.status}</span></td>
+                <td>${l.abertura ? new Date(l.abertura).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : 'N/A'}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="editarLicitacao('${l.id}')"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="excluirLicitacao('${l.id}')"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>`).join('');
+    }
+    
+    // ##########################################
+    // ### FUNÇÃO SALVAR LICITAÇÃO CORRIGIDA  ###
+    // ##########################################
+    async function salvarLicitacao(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const licitacaoId = formData.get('id');
+
+        // Construção do objeto de dados sem manipulação manual de strings.
+        const dados = {
+            numero: formData.get('numero'),
+            ano: formData.get('ano'),
+            objeto: formData.get('objeto'), // CORRIGIDO
+            modalidade_id: formData.get('modalidade_id'),
+            secretaria_id: formData.get('secretaria_id'),
+            pregoeiro_id: formData.get('pregoeiro_id'),
+            fase_atual_id: formData.get('fase_atual_id'),
+            abertura: formData.get('abertura') || null,
+            encerramento_proposta: formData.get('encerramento_proposta') || null,
+            sessao_publica: formData.get('sessao_publica') || null,
+            prazo_impugnacao: formData.get('prazo_impugnacao') || null,
+            valor_estimado: formData.get('valor_estimado') || null,
+            criterio_julgamento: formData.get('criterio_julgamento') || null, // CORRIGIDO
+            prazo_entrega: formData.get('prazo_entrega') || null, // CORRIGIDO
+            link_edital: formData.get('link_edital') || null,
+            publicada: formData.has('publicada'),
+            status: formData.get('status'),
+        };
+
+        const equipeMembros = Array.from(document.querySelectorAll('select[name="equipe_apoio_membro[]"]')).map(s => s.value).filter(Boolean);
+
+        try {
+            let licitacaoSalva;
+            if (licitacaoId) {
+                // UPDATE
+                const { data, error } = await supabase.from('licitacoes').update(dados).eq('id', licitacaoId).select().single();
+                if (error) throw error;
+                licitacaoSalva = data;
+            } else {
+                // INSERT
+                const { data, error } = await supabase.from('licitacoes').insert([dados]).select().single();
+                if (error) throw error;
+                licitacaoSalva = data;
+            }
+
+            if (licitacaoSalva) {
+                await supabase.from('licitacao_equipe_apoio').delete().eq('licitacao_id', licitacaoSalva.id);
+                if (equipeMembros.length > 0) {
+                    const equipeData = equipeMembros.map(membroId => ({ licitacao_id: licitacaoSalva.id, equipe_apoio_id: membroId }));
+                    await supabase.from('licitacao_equipe_apoio').insert(equipeData);
+                }
+            }
+            
+            mostrarAlerta('Licitação salva com sucesso!');
+            limparFormulario();
+            await carregarDadosIniciais();
+            mostrarSecao('licitacoes');
+
+        } catch (error) { 
+            console.error("Erro detalhado ao salvar licitação:", error);
+            mostrarAlerta('Erro ao salvar licitação: ' + error.message, 'erro'); 
+        }
+    }
+    
+    async function editarLicitacao(id) {
+        const licitacao = dadosCache.licitacoes.find(l => l.id === id);
+        if (!licitacao) return mostrarAlerta('Licitação não encontrada!', 'erro');
+        
+        limparFormulario();
+        mostrarSecao('nova-licitacao');
+        
+        document.getElementById('page-title').textContent = 'Editar Licitação';
+        
+        await new Promise(resolve => setTimeout(resolve, 10));
+        
+        document.getElementById('licitacao-id').value = licitacao.id;
+        for (const key in licitacao) {
+            const el = document.querySelector(`#form-licitacao [name="${key}"]`);
+            if (el) {
+                if (el.type === 'checkbox' || el.type === 'switch') el.checked = licitacao[key];
+                else if (el.type === 'date') el.value = licitacao[key] ? licitacao[key].split('T')[0] : '';
+                else if (el.type === 'datetime-local') el.value = licitacao[key] ? new Date(new Date(licitacao[key]).getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().substring(0, 16) : '';
+                else el.value = licitacao[key] ?? '';
+            }
+        }
+
+        document.querySelector('select[name="modalidade_id"]').dispatchEvent(new Event('change'));
+        await new Promise(resolve => setTimeout(resolve, 10));
+        if (licitacao.criterio_julgamento) {
+            document.getElementById('criterio-julgamento-select').value = licitacao.criterio_julgamento;
+        }
+
+        const { data: equipe } = await supabase.from('licitacao_equipe_apoio').select('equipe_apoio_id').eq('licitacao_id', id);
+        const containerEquipe = document.getElementById('equipe-apoio-licitacao-container');
+        containerEquipe.innerHTML = '';
+        if (equipe && equipe.length > 0) {
+            equipe.forEach(membro => {
+                adicionarEquipeLicitacao();
+                const ultimoSelect = containerEquipe.querySelector('.row:last-child select');
+                if(ultimoSelect) ultimoSelect.value = membro.equipe_apoio_id;
+            });
+        }
+    }
+
+    async function excluirLicitacao(id) {
+        if (!confirm('Deseja excluir esta licitação? A ação não pode ser desfeita.')) return;
+        try {
+            await supabase.from('licitacao_equipe_apoio').delete().eq('licitacao_id', id);
+            await supabase.from('licitacoes').delete().eq('id', id);
+            mostrarAlerta('Licitação excluída!');
+            await carregarDadosIniciais();
+        } catch (error) { mostrarAlerta('Erro ao excluir: ' + error.message, 'erro'); }
+    }
+
+    function limparFormulario() {
+        document.getElementById('form-licitacao').reset();
+        document.getElementById('licitacao-id').value = '';
+        document.getElementById('equipe-apoio-licitacao-container').innerHTML = '';
+        document.querySelector('input[name="ano"]').value = new Date().getFullYear();
+        document.getElementById('page-title').textContent = 'Nova Licitação';
+    }
+    
+    function adicionarEquipeLicitacao() {
+        const container = document.getElementById('equipe-apoio-licitacao-container');
+        const div = document.createElement('div');
+        div.className = 'row mb-2 align-items-center';
+        div.innerHTML = `<div class="col-10"><select class="form-select" name="equipe_apoio_membro[]"><option value="">Selecione um membro...</option></select></div><div class="col-2"><button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.row').remove()"><i class="bi bi-trash"></i></button></div>`;
+        container.appendChild(div);
+        preencherDropdowns();
+    }
+    
+    function adicionarCriterio() {
+        const container = document.getElementById('criterios-container');
+        const div = document.createElement('div');
+        div.className = 'input-group mb-2';
+        div.innerHTML = `<input type="text" class="form-control" placeholder="Ex: Menor Preço"><button type="button" class="btn btn-outline-danger" onclick="removerCriterio(this)"><i class="bi bi-trash"></i></button>`;
+        container.appendChild(div);
+    }
+
+    function removerCriterio(btn) { btn.closest('.input-group').remove(); }
+    
+    // Funções de CRUD para Secretarias
+    function carregarTabelaSecretarias() {
+        const tbody = document.getElementById('tabela-secretarias');
+        tbody.innerHTML = dadosCache.secretarias.map(s => `<tr><td>${s.nome}</td><td>${s.responsavel || ''}</td><td>${s.email || s.telefone || ''}</td><td><span class="badge bg-${s.ativa ? 'success' : 'secondary'}">${s.ativa ? 'Ativa' : 'Inativa'}</span></td><td><button class="btn btn-sm btn-outline-primary" onclick="editarSecretaria('${s.id}')"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-outline-danger" onclick="excluirSecretaria('${s.id}')"><i class="bi bi-trash"></i></button></td></tr>`).join('');
+    }
+    function limparFormSecretaria() { document.getElementById('form-secretaria').reset(); document.getElementById('secretaria-id').value = ''; }
+    function editarSecretaria(id) {
+        const item = dadosCache.secretarias.find(i => i.id === id);
+        if(!item) return;
+        const form = document.getElementById('form-secretaria');
+        for (const key in item) {
+            const el = form.querySelector(`[name="${key}"]`);
+            if (el) {
+                if(el.type === 'checkbox') el.checked = item[key];
+                else el.value = item[key] ?? '';
+            }
+        }
+    }
+    async function excluirSecretaria(id) {
+        if (!confirm('Deseja excluir esta secretaria?')) return;
+        try {
+            await supabase.from('secretarias').delete().eq('id', id);
+            mostrarAlerta('Secretaria excluída!');
+            await carregarDadosIniciais();
+        } catch (error) { mostrarAlerta(`Erro: ${error.message}`, 'erro'); }
+    }
+    async function salvarSecretaria(event) {
+        event.preventDefault();
+        const form = document.getElementById('form-secretaria');
+        const formData = new FormData(form);
+        const id = formData.get('id');
+        const dados = Object.fromEntries(formData.entries());
+        dados.ativa = formData.has('ativa');
+        delete dados.id;
+
+        try {
+            if (id) { await supabase.from('secretarias').update(dados).eq('id', id); }
+            else { await supabase.from('secretarias').insert([dados]); }
+            mostrarAlerta('Secretaria salva com sucesso!');
+            limparFormSecretaria();
+            await carregarDadosIniciais();
+        } catch (error) { mostrarAlerta(`Erro: ${error.message}`, 'erro'); }
+    }
+
+    // Funções de CRUD para Pregoeiros
+    function carregarTabelaPregoeiros() {
+        const tbody = document.getElementById('tabela-pregoeiros');
+        tbody.innerHTML = dadosCache.pregoeiros.map(p => `<tr><td>${p.nome}</td><td>${p.matricula || ''}</td><td>${p.secretarias ? p.secretarias.sigla : 'N/A'}</td><td><span class="badge bg-${p.ativo ? 'success' : 'secondary'}">${p.ativo ? 'Ativo' : 'Inativo'}</span></td><td><button class="btn btn-sm btn-outline-primary" onclick="editarPregoeiro('${p.id}')"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-outline-danger" onclick="excluirPregoeiro('${p.id}')"><i class="bi bi-trash"></i></button></td></tr>`).join('');
+    }
+    function limparFormPregoeiro() { document.getElementById('form-pregoeiro').reset(); document.getElementById('pregoeiro-id').value = ''; }
+    function editarPregoeiro(id) {
+        const item = dadosCache.pregoeiros.find(i => i.id === id);
+        if(!item) return;
+        const form = document.getElementById('form-pregoeiro');
+        for (const key in item) {
+            const el = form.querySelector(`[name="${key}"]`);
+            if (el) {
+                if(el.type === 'checkbox') el.checked = item[key];
+                else el.value = item[key] ?? '';
+            }
+        }
+    }
+    async function excluirPregoeiro(id) {
+        if (!confirm('Deseja excluir este pregoeiro?')) return;
+        try {
+            await supabase.from('pregoeiros').delete().eq('id', id);
+            mostrarAlerta('Pregoeiro excluído!');
+            await carregarDadosIniciais();
+        } catch (error) { mostrarAlerta(`Erro: ${error.message}`, 'erro'); }
+    }
+    async function salvarPregoeiro(event) {
+        event.preventDefault();
+        const form = document.getElementById('form-pregoeiro');
+        const formData = new FormData(form);
+        const id = formData.get('id');
+        const dados = Object.fromEntries(formData.entries());
+        dados.ativo = formData.has('ativo');
+        delete dados.id;
+        if (dados.secretaria_id === '') dados.secretaria_id = null;
+
+        try {
+            if (id) { await supabase.from('pregoeiros').update(dados).eq('id', id); }
+            else { await supabase.from('pregoeiros').insert([dados]); }
+            mostrarAlerta('Pregoeiro salvo com sucesso!');
+            limparFormPregoeiro();
+            await carregarDadosIniciais();
+        } catch (error) { mostrarAlerta(`Erro: ${error.message}`, 'erro'); }
+    }
+    
+    // Funções de CRUD para Modalidades
+    function carregarTabelaModalidades() {
+        const tbody = document.getElementById('tabela-modalidades');
+        tbody.innerHTML = dadosCache.modalidades.map(m => `<tr><td>${m.nome}</td><td>${(m.criterios_julgamento || '').substring(0, 30)}...</td><td><span class="badge bg-${m.ativa ? 'success' : 'secondary'}">${m.ativa ? 'Ativa' : 'Inativa'}</span></td><td><button class="btn btn-sm btn-outline-primary" onclick="editarModalidade('${m.id}')"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-outline-danger" onclick="excluirModalidade('${m.id}')"><i class="bi bi-trash"></i></button></td></tr>`).join('');
+    }
+    function limparFormModalidade() { 
+        document.getElementById('form-modalidade').reset(); 
+        document.getElementById('modalidade-id').value = '';
+        document.getElementById('criterios-container').innerHTML = '';
+    }
+    function editarModalidade(id) {
+        const item = dadosCache.modalidades.find(i => i.id === id);
+        if(!item) return;
+        limparFormModalidade();
+        const form = document.getElementById('form-modalidade');
+        form.querySelector('[name="id"]').value = item.id;
+        form.querySelector('[name="nome"]').value = item.nome;
+        form.querySelector('[name="ativa"]').checked = item.ativa;
+
+        const container = document.getElementById('criterios-container');
+        if (item.criterios_julgamento) {
+            item.criterios_julgamento.split(',').forEach(c => {
+                const criterio = c.trim();
+                if(criterio) {
+                    adicionarCriterio();
+                    container.querySelector('.input-group:last-child input').value = criterio;
+                }
+            });
+        }
+    }
+    async function excluirModalidade(id) {
+        if (!confirm('Deseja excluir esta modalidade?')) return;
+        try {
+            await supabase.from('modalidades').delete().eq('id', id);
+            mostrarAlerta('Modalidade excluída!');
+            await carregarDadosIniciais();
+        } catch (error) { mostrarAlerta(`Erro: ${error.message}`, 'erro'); }
+    }
+    async function salvarModalidade(event) {
+        event.preventDefault();
+        const form = document.getElementById('form-modalidade');
+        const formData = new FormData(form);
+        const id = formData.get('id');
+        const dados = {
+            nome: formData.get('nome'),
+            ativa: formData.has('ativa'),
+            criterios_julgamento: Array.from(document.querySelectorAll('#criterios-container input')).map(i => i.value.trim()).filter(Boolean).join(', ')
+        };
+        try {
+            if (id) { await supabase.from('modalidades').update(dados).eq('id', id); }
+            else { await supabase.from('modalidades').insert([dados]); }
+            mostrarAlerta('Modalidade salva com sucesso!');
+            limparFormModalidade();
+            await carregarDadosIniciais();
+        } catch (error) { mostrarAlerta(`Erro: ${error.message}`, 'erro'); }
+    }
+
+    // Funções de CRUD para Fases
+    function carregarTabelaFases() {
+        const tbody = document.getElementById('tabela-fases');
+        tbody.innerHTML = dadosCache.fases.map(f => `<tr><td>${f.ordem}</td><td><span class="badge" style="background-color:${f.cor || '#6c757d'}">${f.nome}</span></td><td><span class="badge bg-${f.ativa ? 'success' : 'secondary'}">${f.ativa ? 'Ativa' : 'Inativa'}</span></td><td><button class="btn btn-sm btn-outline-primary" onclick="editarFase('${f.id}')"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-outline-danger" onclick="excluirFase('${f.id}')"><i class="bi bi-trash"></i></button></td></tr>`).join('');
+    }
+    function limparFormFase() { document.getElementById('form-fase').reset(); document.getElementById('fase-id').value = ''; }
+    function editarFase(id) {
+        const item = dadosCache.fases.find(i => i.id === id);
+        if(!item) return;
+        const form = document.getElementById('form-fase');
+        form.querySelector('[name="id"]').value = item.id;
+        form.querySelector('[name="nome"]').value = item.nome;
+        form.querySelector('[name="cor"]').value = item.cor;
+        form.querySelector('[name="ordem"]').value = item.ordem;
+        form.querySelector('[name="ativa"]').checked = item.ativa;
+    }
+    async function excluirFase(id) {
+        if (!confirm('Deseja excluir esta fase?')) return;
+        try {
+            await supabase.from('fases').delete().eq('id', id);
+            mostrarAlerta('Fase excluída!');
+            await carregarDadosIniciais();
+        } catch (error) { mostrarAlerta(`Erro: ${error.message}`, 'erro'); }
+    }
+    async function salvarFase(event) {
+        event.preventDefault();
+        const form = document.getElementById('form-fase');
+        const formData = new FormData(form);
+        const id = formData.get('id');
+        const dados = Object.fromEntries(formData.entries());
+        dados.ativa = formData.has('ativa');
+        delete dados.id;
+
+        try {
+            if (id) { await supabase.from('fases').update(dados).eq('id', id); }
+            else { await supabase.from('fases').insert([dados]); }
+            mostrarAlerta('Fase salva com sucesso!');
+            limparFormFase();
+            await carregarDadosIniciais();
+        } catch (error) { mostrarAlerta(`Erro: ${error.message}`, 'erro'); }
+    }
+
+    // Funções de CRUD para Equipe de Apoio
+    function carregarTabelaEquipeApoio() {
+        const tbody = document.getElementById('tabela-equipe-apoio');
+        tbody.innerHTML = dadosCache.equipeApoio.map(e => `<tr><td>${e.nome}</td><td>${e.funcao}</td><td>${e.email || e.telefone || ''}</td><td><span class="badge bg-${e.ativo ? 'success' : 'secondary'}">${e.ativo ? 'Ativo' : 'Inativo'}</span></td><td><button class="btn btn-sm btn-outline-primary" onclick="editarEquipeApoio('${e.id}')"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-outline-danger" onclick="excluirEquipeApoio('${e.id}')"><i class="bi bi-trash"></i></button></td></tr>`).join('');
+    }
+    function limparFormEquipeApoio() { document.getElementById('form-equipe-apoio').reset(); document.getElementById('equipe-id').value = ''; }
+    function editarEquipeApoio(id) {
+        const item = dadosCache.equipeApoio.find(i => i.id === id);
+        if(!item) return;
+        const form = document.getElementById('form-equipe-apoio');
+        for (const key in item) {
+            const el = form.querySelector(`[name="${key}"]`);
+            if (el) {
+                if(el.type === 'checkbox') el.checked = item[key];
+                else el.value = item[key] ?? '';
+            }
+        }
+    }
+    async function excluirEquipeApoio(id) {
+        if (!confirm('Deseja excluir este membro da equipe?')) return;
+        try {
+            await supabase.from('equipe_apoio_geral').delete().eq('id', id);
+            mostrarAlerta('Membro da equipe excluído!');
+            await carregarDadosIniciais();
+        } catch (error) { mostrarAlerta(`Erro: ${error.message}`, 'erro'); }
+    }
+    async function salvarEquipeApoio(event) {
+        event.preventDefault();
+        const form = document.getElementById('form-equipe-apoio');
+        const formData = new FormData(form);
+        const id = formData.get('id');
+        const dados = Object.fromEntries(formData.entries());
+        dados.ativo = formData.has('ativo');
+        delete dados.id;
+
+        try {
+            if (id) { await supabase.from('equipe_apoio_geral').update(dados).eq('id', id); }
+            else { await supabase.from('equipe_apoio_geral').insert([dados]); }
+            mostrarAlerta('Membro da equipe salvo com sucesso!');
+            limparFormEquipeApoio();
+            await carregarDadosIniciais();
+        } catch (error) { mostrarAlerta(`Erro: ${error.message}`, 'erro'); }
+    }
+
+  </script>
+</body>
+</html>

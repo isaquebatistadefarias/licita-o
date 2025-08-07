@@ -1,0 +1,39 @@
+{
+  "routes": [
+    {
+      "route": "/login.html",
+      "allowedRoles": ["anonymous"]
+    },
+    {
+      "route": "/admin.html",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/api/*",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/api/licitacoes-publicas",
+      "allowedRoles": ["anonymous", "authenticated"]
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html"
+  },
+  "responseOverrides": {
+    "401": {
+      "rewrite": "/login.html",
+      "statusCode": 302
+    }
+  },
+  "auth": {
+    "identityProviders": {
+      "github": {
+        "registration": {
+          "clientIdSettingName": "GITHUB_CLIENT_ID",
+          "clientSecretSettingName": "GITHUB_CLIENT_SECRET"
+        }
+      }
+    }
+  }
+}

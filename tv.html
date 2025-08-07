@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Licitações Mirassol d'Oeste</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* Seu CSS original aqui... (sem alterações) */
+         :root { --primary-color: #0d6efd; /* ... */ }
+        body { background-color: #f8f9fa; /* ... */ }
+        /* ... todo o resto do seu CSS ... */
+    </style>
+</head>
+<body>
+    <div class="sidebar-overlay"></div>
+    <nav class="sidebar">
+        </nav>
+    <main class="main-content">
+        </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    let dadosCache = { licitacoes: [], secretarias: [], pregoeiros: [], modalidades: [], fases: [], equipeApoio: [] };
+    let chartModalidadesInstance, chartPregoeirosInstance, chartLicitacoesPorMesInstance, chartStatusProcessosInstance;
+    
+    document.addEventListener('DOMContentLoaded', async function() {
+        // A autenticação é gerenciada pelo Azure. Se o usuário está aqui, está logado.
+        // Vamos buscar o e-mail do usuário logado para exibir no painel.
+        try {
+            const res = await fetch('/.auth/me');
+            const data = await res.json();
+            if (data && data.clientPrincipal) {
+                 document.querySelector('.user-info').textContent = data.clientPrincipal.userDetails;
+            }
+        } catch(e) { console.error("Não foi possível buscar dados do usuário.", e); }
+        
+        await carregarDadosIniciais();
+        configurarEventListeners();
+        mostrarSecao('dashboard');
+    });
+
+    // Logout agora redireciona para o endpoint do Azure
+    async function logout() {
+        if (confirm('Tem certeza que deseja sair?')) {
+            window.location.href = '/.auth/logout';
+        }
+    }
+
+    function mostrarSecao(secaoId) {
+        document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+        document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+        
+        const secao = document.getElementById(secaoId);
+        if(secao) secao.style.display = 'block';
+        
+        const linkAtivo = [...document.querySelectorAll('.sidebar .nav-link')].find(l => l.getAttribute('onclick').includes(`'${secaoId}'`));
+        if(linkAtivo) linkAtivo.classList.add('active');
+        
+        const titulos = { 'dashboard': 'Dashboard', 'licitacoes': 'Gerenciar Licitações', 'nova-licitacao': 'Nova Licitação', 'secretarias': 'Secretarias', 'pregoeiros': 'Pregoeiros', 'modalidades': 'Modalidades', 'fases': 'Fases do Processo', 'equipe-apoio': 'Equipe de Apoio' };
+        document.getElementById('page-title').textContent = titulos[secaoId] || 'Painel';
+    }
+
+    function configurarEventListeners() {
+        document.getElementById('filtro-numero').addEventListener('input', filtrarLicitacoes);
+        document.getElementById('filtro-modalidade-admin').addEventListener('change', filtrarLicitacoes);
+        document.getElementById('filtro-secretaria-admin').addEventListener('change', filtrarLicitacoes);
+        document.getElementById('filtro-fase-admin').addEventListener('change', filtrarLicitacoes);
+        document.querySelector('select[name="modalidade_id"]').addEventListener('change', atualizarCriteriosJulgamento);
+        
+        const sidebarToggle = document.querySelector('.sidebar-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.querySelector('.sidebar-overlay');
+
+        if(sidebarToggle && sidebar && overlay) {
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('is-open');
+                overlay.classList.toggle('is-active');
+            });
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('is-open');
+                overlay.classList.remove('is-active');
+            });
+        }
+    }
+    
+    function mostrarAlerta(mensagem, tipo = 'sucesso') {
+        const cor = tipo === 'sucesso' ? '#198754' : '#dc3545';
+        const toastContainer = document.querySelector('body');
+        const toast = document.createElement('div');
+        toast.className = `p-3 text-white`;
+        toast.style.cssText = `position:fixed; top:20px; right:20px; background-color:${cor}; border-radius:8px; z-index:9999; box-shadow:0 4px 8px rgba(0,0,0,0.2);`;
+        toast.textContent = mensagem;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    async function carregarDadosIniciais() {
+        const loadingDiv = document.getElementById('loading-dashboard');
+        if(loadingDiv) loadingDiv.style.display = 'block';
+        
+        try {
+            // Chamada única para buscar todos os dados do painel via API
+            const response = await fetch('/api/admin-data');
+            if (!response.ok) throw new Error('Falha ao carregar dados do painel. Verifique se está logado.');
+            
+            dadosCache = await response.json();
+            
+            preencherDropdowns();
+            carregarTabelas();
+            carregarDashboard();
+
+        } catch (error) {
+            mostrarAlerta('Erro ao carregar dados iniciais: ' + error.message, 'erro');
+            console.error("Erro ao carregar dados iniciais:", error);
+        } finally {
+            if(loadingDiv) loadingDiv.style.display = 'none';
+        }
+    }
+
+    // A lógica de preencher dropdowns, gráficos e tabelas permanece a mesma,
+    // pois ela opera sobre a variável 'dadosCache', que agora é preenchida pela API.
+
+    function preencherDropdowns() {
+        const preencher = (seletor, dados, valor, texto) => {
+            document.querySelectorAll(seletor).forEach(select => {
+                if(!select) return;
+                const valorAtual = select.value;
+                const primeiraOpcaoTexto = select.querySelector('option:first-child') ? select.querySelector('option:first-child').innerText : 'Selecione...';
+                let options = `<option value="">${primeiraOpcaoTexto}</option>`;
+                dados.forEach(item => {
+                    if (item.ativa !== false || item.ativo !== false) {
+                        options += `<option value="${item[valor]}">${typeof texto === 'function' ? texto(item) : item[texto]}</option>`;
+                    }
+                });
+                select.innerHTML = options;
+                select.value = valorAtual;
+            });
+        };
+        preencher('select[name="modalidade_id"], #filtro-modalidade-admin', dadosCache.modalidades, 'id', 'nome');
+        preencher('select[name="secretaria_id"], #filtro-secretaria-admin, #form-pregoeiro select[name="secretaria_id"]', dadosCache.secretarias, 'id', 'nome');
+        preencher('select[name="pregoeiro_id"]', dadosCache.pregoeiros, 'id', 'nome');
+        preencher('select[name="fase_atual_id"], #filtro-fase-admin', dadosCache.fases, 'id', 'nome');
+        // A equipe de apoio agora é preenchida dinamicamente no formulário de licitação.
+    }
+    
+    // Todas as funções de gráficos (criarChartModalidades, etc.) e tabelas permanecem iguais.
+    function carregarTabelas() { /* ...código original... */ }
+    function carregarDashboard() { /* ...código original... */ }
+    function criarChartModalidades() { /* ...código original... */ }
+    function criarChartPregoeiros() { /* ...código original... */ }
+    function criarChartLicitacoesPorMes() { /* ...código original... */ }
+    function criarChartStatusProcessos() { /* ...código original... */ }
+    function carregarTabelaRecentes() { /* ...código original... */ }
+    function filtrarLicitacoes() { /* ...código original... */ }
+    function carregarTabelaTodasLicitacoes(licitacoes) { /* ...código original... */ }
+
+
+    // EXEMPLO DE FUNÇÃO DE CRUD CORRIGIDA (APLIQUE ESTA LÓGICA A TODAS AS OUTRAS)
+
+    async function salvarSecretaria(event) {
+        event.preventDefault();
+        const form = document.getElementById('form-secretaria');
+        const formData = new FormData(form);
+        const id = formData.get('id');
+        const dados = Object.fromEntries(formData.entries());
+        dados.ativa = formData.has('ativa');
+        
+        const url = id ? `/api/secretarias?id=${id}` : '/api/secretarias';
+        const method = id ? 'PUT' : 'POST';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erro ao salvar secretaria.');
+            }
+
+            mostrarAlerta('Secretaria salva com sucesso!');
+            limparFormSecretaria();
+            await carregarDadosIniciais(); // Recarrega os dados para atualizar a tela
+        } catch (error) { 
+            mostrarAlerta(`Erro: ${error.message}`, 'erro'); 
+        }
+    }
+
+    async function excluirSecretaria(id) {
+        if (!confirm('Deseja realmente excluir esta secretaria? A ação não pode ser desfeita.')) return;
+        try {
+            const response = await fetch(`/api/secretarias?id=${id}`, { method: 'DELETE' });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Falha ao excluir secretaria.');
+            }
+
+            mostrarAlerta('Secretaria excluída com sucesso!');
+            await carregarDadosIniciais(); // Recarrega os dados
+        } catch (error) { 
+            mostrarAlerta(`Erro ao excluir: ${error.message}`, 'erro'); 
+        }
+    }
+    
+    // Você deve aplicar a mesma lógica de fetch() para as outras funções de CRUD:
+    // salvarLicitacao, editarLicitacao, excluirLicitacao
+    // salvarPregoeiro, editarPregoeiro, excluirPregoeiro
+    // salvarModalidade, editarModalidade, excluirModalidade
+    // salvarFase, editarFase, excluirFase
+    // salvarEquipeApoio, editarEquipeApoio, excluirEquipeApoio
+    
+    // O resto das funções (limparForm, editar*, etc.) que manipulam o formulário
+    // permanecem as mesmas, pois operam no DOM do cliente.
+    
+    </script>
+</body>
+</html>

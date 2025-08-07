@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Licitações em Andamento - Prefeitura de Mirassol d'Oeste</title>
+  <meta name="description" content="Acompanhe as licitações em andamento da Prefeitura de Mirassol d'Oeste - MT. Transparência e acesso à informação.">
+  <meta name="keywords" content="licitações, Mirassol d'Oeste, transparência, governo, pregão">
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Seu CSS original aqui... (sem alterações) */
+    :root { --primary-color: #0d6efd; /* ... */ }
+    body { font-family: 'Inter', sans-serif; /* ... */ }
+    /* ... todo o resto do seu CSS ... */
+  </style>
+</head>
+<body>
+  <div id="loading-overlay" class="loading-overlay" style="display: none;">
+      </div>
+  <header class="custom-header">
+      </header>
+  <section class="breadcrumb-section">
+      </section>
+  <section class="stats-section">
+      </section>
+  <section class="filters-section">
+      </section>
+  <section class="table-section">
+      </section>
+  <a href="https://wa.me/5565999530883?text=Olá! Gostaria de mais informações sobre as licitações de Mirassol d'Oeste." 
+     target="_blank" class="btn-whatsapp d-flex align-items-center">
+    </a>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    let licitacoes = [];
+    let licitacoesFiltradas = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      configurarEventos();
+      carregarDados();
+      atualizarTimestamp();
+      setInterval(carregarDados, 5 * 60 * 1000); // Atualiza a cada 5 minutos
+    });
+
+    async function carregarDados() {
+      try {
+        mostrarLoading(true);
+        // A chamada agora é para a sua nova API pública
+        const response = await fetch('/api/licitacoes-publicas');
+
+        if (!response.ok) {
+          throw new Error(`Erro na API: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        licitacoes = data || [];
+        licitacoesFiltradas = licitacoes;
+        
+        atualizarEstatisticas();
+        carregarFiltros();
+        renderizarTabela();
+        
+      } catch (error) {
+        console.error('Erro geral ao carregar dados:', error);
+        mostrarMensagem('Erro de conexão. Verifique sua internet.', 'danger');
+      } finally {
+        mostrarLoading(false);
+      }
+    }
+    
+    function atualizarEstatisticas() {
+      const total = licitacoes.length;
+      const emAndamento = licitacoes.filter(l => l.fase_nome && l.fase_nome.toLowerCase().includes('andamento')).length;
+      const publicadas = licitacoes.filter(l => l.fase_nome && l.fase_nome.toLowerCase().includes('publicada')).length;
+      const modalidades = new Set(licitacoes.map(l => l.modalidade_nome).filter(m => m));
+      
+      animarNumero('total-licitacoes', total);
+      animarNumero('em-andamento', emAndamento);
+      animarNumero('publicadas-hoje', publicadas);
+      animarNumero('modalidades-ativas', modalidades.size);
+    }
+
+    function animarNumero(elementId, valorFinal) {
+      const elemento = document.getElementById(elementId);
+      if (!elemento) return;
+      const valorAtual = parseInt(elemento.textContent) || 0;
+      if (valorAtual === valorFinal) return;
+      const duracao = 1000;
+      const passo = (valorFinal - valorAtual) / (duracao / 20);
+      
+      let contador = valorAtual;
+      const intervalo = setInterval(() => {
+        contador += passo;
+        if ((passo > 0 && contador >= valorFinal) || (passo < 0 && contador <= valorFinal)) {
+          elemento.textContent = valorFinal;
+          clearInterval(intervalo);
+        } else {
+          elemento.textContent = Math.ceil(contador);
+        }
+      }, 20);
+    }
+
+    function carregarFiltros() {
+      const modalidades = [...new Set(licitacoes.map(l => l.modalidade_nome).filter(m => m))];
+      const selectModalidade = document.getElementById('filtroModalidade');
+      selectModalidade.innerHTML = '<option value="">Todas</option>';
+      modalidades.sort().forEach(modalidade => {
+        selectModalidade.innerHTML += `<option value="${modalidade}">${modalidade}</option>`;
+      });
+
+      const secretarias = [...new Set(licitacoes.map(l => l.secretaria_nome).filter(s => s))];
+      const selectSecretaria = document.getElementById('filtroSecretaria');
+      selectSecretaria.innerHTML = '<option value="">Todas</option>';
+      secretarias.sort().forEach(secretaria => {
+        selectSecretaria.innerHTML += `<option value="${secretaria}">${secretaria}</option>`;
+      });
+
+      const fases = [...new Set(licitacoes.map(l => l.fase_nome).filter(f => f))];
+      const selectFase = document.getElementById('filtroFase');
+      selectFase.innerHTML = '<option value="">Todas</option>';
+      fases.sort().forEach(fase => {
+        selectFase.innerHTML += `<option value="${fase}">${fase}</option>`;
+      });
+    }
+
+    function aplicarFiltros() {
+      const busca = document.getElementById('busca').value.toLowerCase();
+      const modalidade = document.getElementById('filtroModalidade').value;
+      const secretaria = document.getElementById('filtroSecretaria').value;
+      const fase = document.getElementById('filtroFase').value;
+
+      licitacoesFiltradas = licitacoes.filter(licitacao => {
+        const matchBusca = !busca || 
+          (licitacao.numero && licitacao.numero.toLowerCase().includes(busca)) ||
+          (licitacao.objeto && licitacao.objeto.toLowerCase().includes(busca));
+        
+        const matchModalidade = !modalidade || licitacao.modalidade_nome === modalidade;
+        const matchSecretaria = !secretaria || licitacao.secretaria_nome === secretaria;
+        const matchFase = !fase || licitacao.fase_nome === fase;
+
+        return matchBusca && matchModalidade && matchSecretaria && matchFase;
+      });
+
+      renderizarTabela();
+    }
+
+    function limparFiltros() {
+      document.getElementById('busca').value = '';
+      document.getElementById('filtroModalidade').value = '';
+      document.getElementById('filtroSecretaria').value = '';
+      document.getElementById('filtroFase').value = '';
+      
+      licitacoesFiltradas = licitacoes;
+      renderizarTabela();
+    }
+
+    function renderizarTabela() {
+      const tbody = document.getElementById('tabelaLicitacoes');
+      const emptyState = document.getElementById('empty-state');
+      
+      if (licitacoesFiltradas.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      
+      tbody.innerHTML = licitacoesFiltradas.map((licitacao, index) => {
+        const dataAbertura = formatarData(licitacao.abertura);
+        const equipeTexto = obterEquipeTexto(licitacao);
+        
+        return `
+          <tr class="fade-in" style="animation-delay: ${index * 0.05}s">
+            <td>
+              <strong class="text-primary">${licitacao.numero || 'N/A'}</strong>
+              <br>
+              <small class="text-muted">${licitacao.ano || new Date().getFullYear()}</small>
+            </td>
+            <td>
+              <div class="text-truncate" style="max-width: 300px;" title="${licitacao.objeto}">
+                ${licitacao.objeto || 'Objeto não informado'}
+              </div>
+              ${licitacao.valor_estimado ? `<small class="text-success"><i class="bi bi-currency-dollar"></i> R$ ${formatarMoeda(licitacao.valor_estimado)}</small>` : ''}
+            </td>
+            <td>
+              <span class="badge modalidade">${licitacao.modalidade_nome || 'N/A'}</span>
+            </td>
+            <td>
+              <strong>${licitacao.secretaria_sigla || 'N/A'}</strong>
+              <br>
+              <small class="text-muted">${licitacao.secretaria_nome || ''}</small>
+            </td>
+            <td>
+              ${licitacao.pregoeiro_nome || 'N/A'}
+            </td>
+            <td>
+              ${equipeTexto}
+            </td>
+            <td>
+              <span class="badge fase" style="background-color: ${licitacao.fase_cor || '#6c757d'}">
+                ${licitacao.fase_nome || 'N/A'}
+              </span>
+            </td>
+            <td>
+              <strong>${dataAbertura}</strong>
+              ${licitacao.sessao_publica ? `<br><small class="text-muted">Sessão: ${formatarDataHora(licitacao.sessao_publica)}</small>` : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function obterEquipeTexto(licitacao) {
+      if (licitacao.equipe_nomes) {
+        const equipe = licitacao.equipe_nomes.split(',').slice(0, 2);
+        let texto = equipe.join('<br>');
+        if (licitacao.equipe_nomes.split(',').length > 2) {
+          texto += `<br><small class="text-muted">+${licitacao.equipe_nomes.split(',').length - 2} mais</small>`;
+        }
+        return texto || 'N/A';
+      }
+      return 'N/A';
+    }
+
+    function formatarData(data) {
+      if (!data) return 'N/A';
+      const d = new Date(data);
+      return new Date(d.valueOf() + d.getTimezoneOffset() * 60000).toLocaleDateString('pt-BR');
+    }
+
+    function formatarDataHora(data) {
+      if (!data) return 'N/A';
+      return new Date(data).toLocaleString('pt-BR');
+    }
+
+    function formatarMoeda(valor) {
+      if (!valor) return '0,00';
+      return parseFloat(valor).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function mostrarLoading(mostrar) {
+      document.getElementById('loading-overlay').style.display = mostrar ? 'flex' : 'none';
+    }
+
+    function mostrarMensagem(texto, tipo = 'info') {
+      const alertContainer = document.querySelector('body'); // Appending to body
+      if (!alertContainer) return;
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+      alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+      alert.innerHTML = `${texto}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+      alertContainer.appendChild(alert);
+      setTimeout(() => { if (alert.parentNode) { alert.remove(); } }, 5000);
+    }
+
+    function atualizarTimestamp() {
+      document.getElementById('ultima-atualizacao').textContent = new Date().toLocaleString('pt-BR');
+    }
+
+    function configurarEventos() {
+      document.getElementById('busca').addEventListener('input', aplicarFiltros);
+      document.getElementById('filtroModalidade').addEventListener('change', aplicarFiltros);
+      document.getElementById('filtroSecretaria').addEventListener('change', aplicarFiltros);
+      document.getElementById('filtroFase').addEventListener('change', aplicarFiltros);
+      
+      document.getElementById('btnAumentarFonte').addEventListener('click', aumentarFonte);
+      document.getElementById('btnDiminuirFonte').addEventListener('click', diminuirFonte);
+      document.getElementById('btnContraste').addEventListener('click', alternarContraste);
+
+      document.getElementById('card-total').addEventListener('click', limparFiltros);
+      document.getElementById('card-em-andamento').addEventListener('click', () => filtrarPorFase('Em Andamento'));
+      document.getElementById('card-publicadas').addEventListener('click', () => filtrarPorFase('Publicada'));
+    }
+    
+    function filtrarPorFase(nomeFase) {
+        document.getElementById('busca').value = '';
+        document.getElementById('filtroModalidade').value = '';
+        document.getElementById('filtroSecretaria').value = '';
+
+        const selectFase = document.getElementById('filtroFase');
+        selectFase.value = nomeFase;
+        
+        aplicarFiltros();
+    }
+
+    let tamanhoFonte = 16;
+    function aumentarFonte() {
+      if (tamanhoFonte < 24) {
+        tamanhoFonte += 2;
+        document.body.style.fontSize = tamanhoFonte + 'px';
+      }
+    }
+
+    function diminuirFonte() {
+      if (tamanhoFonte > 12) {
+        tamanhoFonte -= 2;
+        document.body.style.fontSize = tamanhoFonte + 'px';
+      }
+    }
+
+    function alternarContraste() {
+      document.body.classList.toggle('alto-contraste');
+      localStorage.setItem('alto-contraste', document.body.classList.contains('alto-contraste'));
+    }
+
+    function exportarExcel() {
+      if (licitacoesFiltradas.length === 0) {
+        mostrarMensagem('Nenhuma licitação para exportar.', 'warning');
+        return;
+      }
+
+      const headers = ['Número', 'Objeto', 'Modalidade', 'Secretaria', 'Pregoeiro', 'Fase', 'Data Abertura'];
+      const dados = licitacoesFiltradas.map(l => [
+        l.numero || '',
+        l.objeto || '',
+        l.modalidade_nome || '',
+        l.secretaria_nome || '',
+        l.pregoeiro_nome || '',
+        l.fase_nome || '',
+        formatarData(l.abertura)
+      ]);
+
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + [headers.join(';'), ...dados.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';'))].join('\n');
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `licitacoes_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      mostrarMensagem('Arquivo CSV exportado com sucesso!', 'success');
+    }
+
+    if (localStorage.getItem('alto-contraste') === 'true') {
+      document.body.classList.add('alto-contraste');
+    }
+  </script>
+</body>
+</html>k
