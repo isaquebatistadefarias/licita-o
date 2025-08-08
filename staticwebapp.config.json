@@ -9,12 +9,12 @@
       "allowedRoles": ["authenticated"]
     },
     {
-      "route": "/api/*",
-      "allowedRoles": ["authenticated"]
-    },
-    {
       "route": "/api/licitacoes-publicas",
       "allowedRoles": ["anonymous", "authenticated"]
+    },
+    {
+      "route": "/api/*",
+      "allowedRoles": ["authenticated"]
     }
   ],
   "navigationFallback": {
