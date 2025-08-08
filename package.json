@@ -4,6 +4,7 @@
   "description": "API para o sistema de licitações",
   "main": "index.js",
   "scripts": {
+    "build": "echo 'Nenhum build necessário para o app, pulando...'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
